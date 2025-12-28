@@ -1,164 +1,192 @@
-<h1 align="center">❤️ CardioPredict – Cardiovascular Risk Prediction System</h1>
+
+<h1 align="center">❤️ CardioPredict AI – Cardiovascular Risk Prediction System</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" />
+  <a href="https://cardio-risk-predictor.netlify.app/"><img src="https://img.shields.io/badge/Live%20Demo-Online-green" /></a>
+  <img src="https://img.shields.io/badge/Accuracy-72%25-blue" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow" />
+  <img src="https://img.shields.io/badge/Status-Production%20Ready-success" />
 </p>
 
 ---
 
-## 📌 Project Overview
-
-**CardioPredict** is a Machine Learning–powered Cardiovascular Disease Risk Prediction Web Application.  
-It analyzes key health indicators such as:
-
-- Blood Pressure (Systolic & Diastolic)
-- Cholesterol Level
-- Glucose Level
-- Age
-- Smoking & Alcohol Habits
-- BMI
-
-The system uses **Logistic Regression** and provides:
-
-✔ Real-time Risk Prediction  
-✔ Risk Probability  
-✔ Confusion Matrix Visualization  
-✔ Model Accuracy & Metrics  
-✔ Feature Importance / Impact Insights  
-✔ Clean medical-grade UI with animations  
+## 🚀 Live Demo
+▶️ **Access the Web App:**  
+https://cardio-risk-predictor.netlify.app/
 
 ---
 
-## 🏠 Homepage
-https://github.com/NikunjRathod48/CardioPredict
+## 🧠 What is CardioPredict AI?
+CardioPredict AI is a **Machine Learning–powered web application** that predicts a person’s risk of cardiovascular disease using clinical health attributes.  
+It provides **real-time predictions**, **probability scores**, **model performance analytics**, and a clean medical-grade UI experience.
 
 ---
 
-## ✨ Demo
-🔗 Demo link will be added after deployment.
+## ✨ Features
+- ✔️ Real-time Risk Prediction
+- ✔️ Probability Score Indicator
+- ✔️ Logistic Regression ML Model
+- ✔️ Confusion Matrix + Accuracy Insights
+- ✔️ Feature Importance Visualization
+- ✔️ Modern React + Tailwind UI
+- ✔️ Fully Deployed & Live
 
 ---
 
-## 🧠 Machine Learning Model Summary
+## 📊 Model Performance
+| Metric | Score |
+|--------|--------|
+| Accuracy | **72%** |
+| Total Test Samples | 13,095 |
+| Model | Logistic Regression |
 
-- Model Used: **Logistic Regression**
-- Accuracy: **72%**
-- Total Test Samples: **13,095**
-- Balanced performance across classes  
-- Supports healthcare risk decision assistance  
-*(Not a replacement for professional medical diagnosis)*
+### Confusion Matrix
+```
+
+TN = 4937   FP = 1520
+FN = 2158   TP = 4480
+
+```
 
 ---
 
-## 🚀 Tech Stack
-
+## 🛠 Tech Stack
 **Frontend**
 - React + Vite ⚡
 - Tailwind CSS 🎨
 - Recharts 📊
-- Toast Notifications
+- Toasts + Animations
 
 **Backend**
 - Flask (Python)
 - REST API
-- Pickle Deployed Model
+- Pickle ML Model
+- CORS Enabled
 
 **Machine Learning**
+- Logistic Regression
 - Scikit-Learn
-- Pandas
-- Numpy
+- Pandas + Numpy
 
 ---
 
 ## 📂 Project Structure
+```
 
-CardioPredict/
+CardioPredict
 │
 ├── backend/
-│ ├── app.py
-│ ├── requirements.txt
-│ ├── Procfile
-│ ├── model/
-│ │ ├── cardio_model.pkl
-│ │ └── scaler.pkl
-│ └── utils/
-│ └── preprocessing.py
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── model/
+│   │   ├── cardio_model.pkl
+│   │   └── scaler.pkl
+│   └── utils/preprocessing.py
 │
-├── frontend/ → React App
-├── notebooks/ → EDA + Training
+├── frontend/
+├── notebooks/
 ├── dataset/
-│ └── cardio_train.csv
 └── README.md
 
+```
+
 ---
 
-## 📥 Installation
+## 🧩 API
+**Endpoint**
+```
 
-### 🔹 Clone Repository
-git clone https://github.com/NikunjRathod48/CardioPredict.git
+POST /predict
+
+````
+
+**Sample Request**
+```json
+{
+ "height":165,
+ "weight":92,
+ "ap_hi":165,
+ "ap_lo":105,
+ "cholesterol":3,
+ "gluc":3,
+ "smoke":1,
+ "alco":1,
+ "age_years":58
+}
+````
+
+**Sample Response**
+
+```json
+{
+ "status": true,
+ "prediction": 1,
+ "risk_probability": 0.78,
+ "message": "High Risk"
+}
+```
+
+---
+
+## 🛠️ Local Setup
+
+### Clone Repo
+
+```
+git clone https://github.com/NikunjRathod48/CardioPredict
 cd CardioPredict
+```
 
----
+### Backend
 
-## ▶️ Usage
-
-### 🖥️ Start Backend
+```
 cd backend
 pip install -r requirements.txt
 python app.py
+```
 
-Backend will run at:
-http://localhost:5000
+### Frontend
 
----
-
-### 🌐 Start Frontend
+```
 cd ../frontend
 npm install
 npm run dev
-
-Access App:
-http://localhost:5173
+```
 
 ---
 
-## 🧪 Run Tests
-N/A
+## 🌍 Deployment
+
+* **Backend:** Render
+* **Frontend:** Netlify
+* **Model:** Pickle Deployed
+
+---
+
+## ⚠️ Disclaimer
+
+This project is for **educational & research purposes** only.
+Not a substitute for professional medical diagnosis.
 
 ---
 
 ## 👤 Author
 
 **Nikunj Rathod**
-
-- 🌎 Website: https://github.com/NikunjRathod48  
-- 🐙 GitHub: https://github.com/NikunjRathod48  
-- 🔗 LinkedIn: https://linkedin.com/in/nikunj-rathod-a2176327b  
-
----
-
-## 🤝 Contributing
-Contributions, issues and feature requests are welcome!
-
-📌 Issues:  
-https://github.com/NikunjRathod48/CardioPredict/issues  
-
-📌 Contributing Guide:  
-https://github.com/NikunjRathod48/CardioPredict/blob/main/CONTRIBUTING.md  
+🔗 GitHub: [https://github.com/NikunjRathod48](https://github.com/NikunjRathod48)
+🔗 LinkedIn: [https://linkedin.com/in/nikunj-rathod-a2176327b](https://linkedin.com/in/nikunj-rathod-a2176327b)
 
 ---
 
 ## ⭐ Support
-If this project helped you, please ⭐ the repo 😍
+
+If you like this project, please ⭐ the repo — it motivates a lot!
 
 ---
 
-## 📝 License
-Copyright © 2025  
-This project is licensed under the **MIT License**  
-https://opensource.org/licenses/MIT
+### 🧡 Thank You for Visiting CardioPredict AI
 
----
+Helping technology support healthier hearts, one prediction at a time.
 
-_This README was generated with ❤️ and redesigned for clarity & professionalism._
+```
+```
