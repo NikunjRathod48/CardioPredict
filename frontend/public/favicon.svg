@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Circle Background -->
+  <circle cx="256" cy="256" r="256" fill="#0ea5e9"/>
+  <!-- Heart Shape -->
+  <path d="M366.56 120.93c-28.74-27.5-70.16-29.35-101.44-8.13l-9.12 6.13-9.12-6.13c-31.28-21.22-72.7-19.37-101.44 8.13-33.8 32.32-35.1 82.25-5.36 117.8l94.55 125.74a25.6 25.6 0 0 0 42.68 0l94.55-125.74c29.74-35.55 28.44-85.48-5.3-117.8z" fill="#ffffff" transform="translate(0, 40) scale(0.9)"/>
+  <!-- Pulse Line -->
+  <path d="M140 256h50l30-50 40 100 30-50h70" stroke="#0ea5e9" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none" transform="translate(0, 40)"/>
+</svg>
