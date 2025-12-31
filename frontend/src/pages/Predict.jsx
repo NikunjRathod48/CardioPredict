@@ -6,7 +6,7 @@ import { Select } from '@/components/ui/Select';
 import { predictRisk } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, CheckCircle2, AlertTriangle, ArrowRight, ClipboardList, Thermometer, User, Cigarette, Wine } from 'lucide-react';
+import { Activity, CheckCircle2, AlertTriangle, ArrowRight, ClipboardList, Thermometer, User, Cigarette, Wine, Dumbbell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -15,12 +15,14 @@ const PredictPage = () => {
         age: '',
         height: '',
         weight: '',
+        gender: '1',
         ap_hi: '',
         ap_lo: '',
         cholesterol: '1',
         gluc: '1',
         smoke: false,
-        alco: false
+        alco: false,
+        active: false
     });
 
     const [loading, setLoading] = useState(false);
@@ -54,28 +56,26 @@ const PredictPage = () => {
                 age: parseInt(formData.age),
                 height: parseInt(formData.height),
                 weight: parseInt(formData.weight),
+                gender: parseInt(formData.gender),
                 ap_hi: parseInt(formData.ap_hi),
                 ap_lo: parseInt(formData.ap_lo),
                 cholesterol: parseInt(formData.cholesterol),
                 gluc: parseInt(formData.gluc),
                 smoke: formData.smoke ? 1 : 0,
-                alco: formData.alco ? 1 : 0
+                alco: formData.alco ? 1 : 0,
+                active: formData.active ? 1 : 0
             };
 
-            const prediction = await predictRisk(data);
+            const response = await predictRisk(data);
+            setResult(response);
 
-            // Artificial delay for "Scanning" effect
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            setResult(prediction);
             setTimeout(() => {
-                resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
 
-            toast.success('Analysis Complete');
         } catch (error) {
-            console.error(error);
-            toast.error(error.message || 'Prediction failed.');
+            console.error("Prediction error:", error);
+            toast.error(error.message || "Failed to generate prediction");
         } finally {
             setLoading(false);
         }
@@ -83,237 +83,326 @@ const PredictPage = () => {
 
     return (
         <ErrorBoundary>
-            <div className="min-h-screen bg-slate-50 relative pb-20">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 z-0 opacity-30 pointer-events-none"
-                    style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-
-                {/* Header */}
-                <div className="bg-slate-900 text-white py-16 relative overflow-hidden">
-                    <div className="absolute top-0 right-[-10%] w-[600px] h-[600px] bg-primary-600/20 rounded-full blur-[100px]" />
-                    <div className="container px-4 md:px-6 relative z-10 text-center">
-                        <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-4xl md:text-5xl font-black tracking-tight mb-4"
-                        >
-                            Health Risk Assessment
-                        </motion.h1>
-                        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-                            Complete the clinical form below to generate an AI-powered cardiovascular prognostic report.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="container px-4 md:px-6 -mt-10 relative z-20 max-w-4xl mx-auto">
-                    {/* Main Form Card */}
+            <div className="min-h-screen pt-24 pb-12 px-4 md:px-6 relative overflow-hidden bg-background transition-colors duration-500">
+                <div className="max-w-4xl mx-auto relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
+                        className="text-center mb-12"
                     >
-                        <Card className="shadow-2xl border-0 overflow-hidden ring-1 ring-slate-900/5">
-                            <div className="h-2 bg-gradient-to-r from-primary-500 via-indigo-500 to-purple-500" />
-                            <CardContent className="p-8 md:p-10">
-                                <form onSubmit={handleSubmit} className="space-y-10">
-
-                                    {/* Section 1: Demographics */}
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-2">
-                                            <User className="h-5 w-5 text-primary-500" />
-                                            <h3 className="font-bold text-lg">Patient Demographics</h3>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <Input label="Age (Years)" name="age" type="number" placeholder="45" value={formData.age} onChange={handleChange} required className="bg-slate-50" />
-                                            <Input label="Height (cm)" name="height" type="number" placeholder="175" value={formData.height} onChange={handleChange} required className="bg-slate-50" />
-                                            <Input label="Weight (kg)" name="weight" type="number" placeholder="75" value={formData.weight} onChange={handleChange} required className="bg-slate-50" />
-                                        </div>
-                                    </div>
-
-                                    {/* Section 2: Vitals */}
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-2">
-                                            <Activity className="h-5 w-5 text-primary-500" />
-                                            <h3 className="font-bold text-lg">Vitals & Labs</h3>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-4">
-                                                <Input label="Systolic BP (mmHg)" name="ap_hi" type="number" placeholder="120" value={formData.ap_hi} onChange={handleChange} required className="bg-slate-50" />
-                                                <Input label="Diastolic BP (mmHg)" name="ap_lo" type="number" placeholder="80" value={formData.ap_lo} onChange={handleChange} required className="bg-slate-50" />
-                                            </div>
-                                            <div className="space-y-4">
-                                                <Select
-                                                    label="Cholesterol"
-                                                    name="cholesterol"
-                                                    value={formData.cholesterol}
-                                                    onChange={handleChange}
-                                                    options={[{ value: '1', label: 'Normal' }, { value: '2', label: 'Above Normal' }, { value: '3', label: 'High' }]}
-                                                />
-                                                <Select
-                                                    label="Glucose"
-                                                    name="gluc"
-                                                    value={formData.gluc}
-                                                    onChange={handleChange}
-                                                    options={[{ value: '1', label: 'Normal' }, { value: '2', label: 'Above Normal' }, { value: '3', label: 'High' }]}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Section 3: Lifestyle */}
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-2">
-                                            <ClipboardList className="h-5 w-5 text-primary-500" />
-                                            <h3 className="font-bold text-lg">Lifestyle Factors</h3>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div
-                                                onClick={() => toggleCheckbox('smoke')}
-                                                className={cn(
-                                                    "cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4",
-                                                    formData.smoke ? "border-primary-500 bg-primary-50" : "border-slate-100 hover:border-slate-200"
-                                                )}
-                                            >
-                                                <div className={cn("p-2 rounded-lg", formData.smoke ? "bg-white text-primary-500" : "bg-slate-100 text-slate-400")}>
-                                                    <Cigarette className="h-6 w-6" />
-                                                </div>
-                                                <div>
-                                                    <span className="font-bold block text-slate-700">Smoker</span>
-                                                    <span className="text-sm text-slate-500">Currently smokes tobacco</span>
-                                                </div>
-                                                {formData.smoke && <CheckCircle2 className="ml-auto text-primary-500 h-6 w-6" />}
-                                            </div>
-
-                                            <div
-                                                onClick={() => toggleCheckbox('alco')}
-                                                className={cn(
-                                                    "cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4",
-                                                    formData.alco ? "border-primary-500 bg-primary-50" : "border-slate-100 hover:border-slate-200"
-                                                )}
-                                            >
-                                                <div className={cn("p-2 rounded-lg", formData.alco ? "bg-white text-primary-500" : "bg-slate-100 text-slate-400")}>
-                                                    <Wine className="h-6 w-6" />
-                                                </div>
-                                                <div>
-                                                    <span className="font-bold block text-slate-700">Alcohol Consumer</span>
-                                                    <span className="text-sm text-slate-500">Regular alcohol intake</span>
-                                                </div>
-                                                {formData.alco && <CheckCircle2 className="ml-auto text-primary-500 h-6 w-6" />}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <Button type="submit" className="w-full text-lg h-16 rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:scale-[1.01]" isLoading={loading}>
-                                        {loading ? 'Processing Clinical Data...' : 'Generate Prediction Report'}
-                                        {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 shadow-sm mb-4">
+                            <Activity className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-semibold text-primary">AI-Powered Assessment</span>
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-black text-foreground mb-4 tracking-tight">
+                            Personal Health <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500 text-glow">Scanner</span>
+                        </h1>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            Input your biometric data below. Our advanced neural network will analyze risk factors in real-time.
+                        </p>
                     </motion.div>
 
-                    {/* Result Dashboard */}
-                    <div ref={resultRef} className="mt-12 scroll-mt-24">
-                        <AnimatePresence mode="wait">
-                            {result && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 40 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.5 }}
-                                >
-                                    <div className="bg-slate-900 rounded-3xl p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/10 rounded-full blur-[100px]" />
-                                        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px]" />
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Form Section */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="lg:col-span-2"
+                        >
+                            <Card className="glass-panel border-border relative overflow-hidden bg-card/50">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-indigo-600" />
+                                <CardHeader>
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="flex items-center gap-2 text-2xl font-bold text-foreground">
+                                            <ClipboardList className="w-6 h-6 text-primary" />
+                                            Patient Data
+                                        </CardTitle>
+                                        <div className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
+                                            Secured & Encrypted
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-8 p-6 md:p-8">
+                                    <form onSubmit={handleSubmit} className="space-y-10">
 
-                                        <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
-                                            <div className="text-center md:text-left space-y-6">
-                                                <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-white/80 text-sm font-medium border border-white/10">
-                                                    <Activity className="h-4 w-4 mr-2" />
-                                                    Analysis Result
+                                        {/* Section 1: Vitals */}
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-3 mb-6">
+                                                <div className="p-2 bg-primary/10 rounded-lg text-primary border border-primary/20">
+                                                    <Thermometer className="w-5 h-5" />
                                                 </div>
-                                                <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
-                                                    {result.risk === 1
-                                                        ? <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">High Risk Detected</span>
-                                                        : <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Low Risk Profile</span>
-                                                    }
-                                                </h2>
-                                                <p className="text-slate-400 text-lg leading-relaxed max-w-md">
-                                                    {result.risk === 1
-                                                        ? "Our algorithms have identified multiple markers indicating a potential cardiovascular irregularity. Immediate clinical consultation is recommended."
-                                                        : "Your physiological markers closely align with optimal health standards. No immediate irregularities detected by the model."
-                                                    }
-                                                </p>
-
-                                                <div className={cn(
-                                                    "p-6 rounded-2xl border border-white/10 flex items-start gap-4",
-                                                    result.risk === 1 ? "bg-red-500/10" : "bg-emerald-500/10"
-                                                )}>
-                                                    {result.risk === 1
-                                                        ? <AlertTriangle className="h-8 w-8 text-red-400 shrink-0" />
-                                                        : <CheckCircle2 className="h-8 w-8 text-emerald-400 shrink-0" />
-                                                    }
-                                                    <div>
-                                                        <h4 className={cn("font-bold text-lg mb-1", result.risk === 1 ? "text-red-400" : "text-emerald-400")}>
-                                                            {result.risk === 1 ? "Action Required" : "Keep it up!"}
-                                                        </h4>
-                                                        <p className="text-white/60 text-sm">
-                                                            {result.risk === 1
-                                                                ? "Lifestyle modifications and a doctor's visit are strongly advised."
-                                                                : "Maintain your current lifestyle and schedule regular checkups."
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                </div>
+                                                <h3 className="text-xl font-bold text-foreground">Physical Vitals</h3>
                                             </div>
 
-                                            {/* Gauge Visual */}
-                                            <div className="flex flex-col items-center justify-center p-8 bg-white/5 rounded-3xl border border-white/10 relative">
-                                                <div className="relative w-64 h-64">
-                                                    <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
-                                                        <circle
-                                                            className="text-slate-800"
-                                                            strokeWidth="8"
-                                                            stroke="currentColor"
-                                                            fill="transparent"
-                                                            r="42"
-                                                            cx="50"
-                                                            cy="50"
-                                                        />
-                                                        <motion.circle
-                                                            className={result.risk === 1 ? "text-red-500" : "text-emerald-500"}
-                                                            strokeWidth="8"
-                                                            strokeDasharray={264}
-                                                            strokeDashoffset={264}
-                                                            strokeLinecap="round"
-                                                            stroke="currentColor"
-                                                            fill="transparent"
-                                                            r="42"
-                                                            cx="50"
-                                                            cy="50"
-                                                            initial={{ strokeDashoffset: 264 }}
-                                                            animate={{ strokeDashoffset: 264 - (264 * result.probability) / 100 }}
-                                                            transition={{ duration: 2, ease: "easeOut", delay: 0.2 }}
-                                                        />
-                                                    </svg>
-                                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                                                        <motion.div
-                                                            initial={{ opacity: 0, scale: 0.5 }}
-                                                            animate={{ opacity: 1, scale: 1 }}
-                                                            transition={{ delay: 1 }}
-                                                            className="text-5xl font-black text-white tracking-tighter"
-                                                        >
-                                                            {result.probability}%
-                                                        </motion.div>
-                                                        <div className="text-xs uppercase tracking-widest text-white/50 font-bold mt-1">Probability</div>
-                                                    </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-muted-foreground">Gender</label>
+                                                    <Select
+                                                        name="gender"
+                                                        value={formData.gender}
+                                                        onChange={handleChange}
+                                                        options={[
+                                                            { value: '1', label: 'Female' },
+                                                            { value: '2', label: 'Male' }
+                                                        ]}
+                                                        className="bg-background border-input text-foreground h-12"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-muted-foreground">Age (Years)</label>
+                                                    <Input
+                                                        type="number"
+                                                        name="age"
+                                                        placeholder="e.g. 45"
+                                                        value={formData.age}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className="bg-background border-input text-foreground h-12"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-muted-foreground">Height (cm)</label>
+                                                    <Input
+                                                        type="number"
+                                                        name="height"
+                                                        placeholder="e.g. 175"
+                                                        value={formData.height}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className="bg-background border-input text-foreground h-12"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-muted-foreground">Weight (kg)</label>
+                                                    <Input
+                                                        type="number"
+                                                        name="weight"
+                                                        placeholder="e.g. 70"
+                                                        value={formData.weight}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className="bg-background border-input text-foreground h-12"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-muted-foreground">Systolic BP</label>
+                                                    <Input
+                                                        type="number"
+                                                        name="ap_hi"
+                                                        placeholder="e.g. 120"
+                                                        value={formData.ap_hi}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className="bg-background border-input text-foreground h-12"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-muted-foreground">Diastolic BP</label>
+                                                    <Input
+                                                        type="number"
+                                                        name="ap_lo"
+                                                        placeholder="e.g. 80"
+                                                        value={formData.ap_lo}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className="bg-background border-input text-foreground h-12"
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {/* Section 2: Lab Results */}
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-3 mb-6">
+                                                <div className="p-2 bg-purple-500/10 rounded-lg text-purple-500 border border-purple-500/20">
+                                                    <Activity className="w-5 h-5" />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-foreground">Lab Results</h3>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-3">
+                                                    <label className="text-sm font-semibold text-muted-foreground">Cholesterol Level</label>
+                                                    <Select
+                                                        name="cholesterol"
+                                                        value={formData.cholesterol}
+                                                        onChange={handleChange}
+                                                        options={[
+                                                            { value: '1', label: 'Normal' },
+                                                            { value: '2', label: 'Above Normal' },
+                                                            { value: '3', label: 'Well Above Normal' }
+                                                        ]}
+                                                        className="bg-background border-input text-foreground h-12"
+                                                    />
+                                                </div>
+                                                <div className="space-y-3">
+                                                    <label className="text-sm font-semibold text-muted-foreground">Glucose Level</label>
+                                                    <Select
+                                                        name="gluc"
+                                                        value={formData.gluc}
+                                                        onChange={handleChange}
+                                                        options={[
+                                                            { value: '1', label: 'Normal' },
+                                                            { value: '2', label: 'Above Normal' },
+                                                            { value: '3', label: 'Well Above Normal' }
+                                                        ]}
+                                                        className="bg-background border-input text-foreground h-12"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Section 3: Lifestyle */}
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-3 mb-6">
+                                                <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 border border-emerald-500/20">
+                                                    <User className="w-5 h-5" />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-foreground">Lifestyle Factors</h3>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <motion.button
+                                                    whileTap={{ scale: 0.98 }}
+                                                    type="button"
+                                                    onClick={() => toggleCheckbox('smoke')}
+                                                    className={cn(
+                                                        "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all h-32",
+                                                        formData.smoke
+                                                            ? "bg-rose-500/10 border-rose-500/50 text-rose-500 shadow-sm"
+                                                            : "bg-background border-border text-muted-foreground hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    <Cigarette className="w-8 h-8 mb-2" />
+                                                    <span className="font-semibold">Smoker</span>
+                                                </motion.button>
+
+                                                <motion.button
+                                                    whileTap={{ scale: 0.98 }}
+                                                    type="button"
+                                                    onClick={() => toggleCheckbox('alco')}
+                                                    className={cn(
+                                                        "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all h-32",
+                                                        formData.alco
+                                                            ? "bg-amber-500/10 border-amber-500/50 text-amber-500 shadow-sm"
+                                                            : "bg-background border-border text-muted-foreground hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    <Wine className="w-8 h-8 mb-2" />
+                                                    <span className="font-semibold">Alcohol</span>
+                                                </motion.button>
+
+                                                <motion.button
+                                                    whileTap={{ scale: 0.98 }}
+                                                    type="button"
+                                                    onClick={() => toggleCheckbox('active')}
+                                                    className={cn(
+                                                        "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all h-32",
+                                                        formData.active
+                                                            ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-500 shadow-sm"
+                                                            : "bg-background border-border text-muted-foreground hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    <Dumbbell className="w-8 h-8 mb-2" />
+                                                    <span className="font-semibold">Physically Active</span>
+                                                </motion.button>
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            type="submit"
+                                            disabled={loading}
+                                            className={cn(
+                                                "w-full h-16 text-lg font-bold rounded-xl transition-all relative overflow-hidden",
+                                                loading
+                                                    ? "bg-muted cursor-not-allowed text-muted-foreground"
+                                                    : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-primary/30"
+                                            )}
+                                        >
+                                            <span className="relative z-10 flex items-center justify-center gap-2">
+                                                {loading ? (
+                                                    <><Activity className="w-5 h-5 animate-spin" /> Analyzing...</>
+                                                ) : (
+                                                    <>Start Analysis <ArrowRight className="w-5 h-5" /></>
+                                                )}
+                                            </span>
+                                        </Button>
+                                    </form>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Results Section - Conditionally Rendered */}
+                        <motion.div
+                            className="lg:col-span-1"
+                            animate={{ opacity: result ? 1 : 0.5, filter: result ? 'blur(0px)' : 'blur(2px)' }}
+                        >
+                            <div ref={resultRef}>
+                                {result ? (
+                                    <div className="sticky top-24 space-y-6">
+                                        <Card className={cn(
+                                            "border-0 overflow-hidden relative shadow-2xl glass-panel",
+                                            result.risk ? "bg-rose-500/10 border-rose-500/30" : "bg-emerald-500/10 border-emerald-500/30"
+                                        )}>
+                                            <div className="absolute inset-0 bg-gradient-to-b from-card/50 to-transparent pointer-events-none" />
+                                            <CardHeader className="text-center pb-2">
+                                                <div className={cn(
+                                                    "w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 shadow-lg",
+                                                    result.risk
+                                                        ? "bg-rose-500/20 text-rose-500 ring-2 ring-rose-500/50 animate-pulse-glow"
+                                                        : "bg-emerald-500/20 text-emerald-500 ring-2 ring-emerald-500/50"
+                                                )}>
+                                                    {result.risk ? <AlertTriangle className="w-10 h-10" /> : <CheckCircle2 className="w-10 h-10" />}
+                                                </div>
+                                                <CardTitle className={cn("text-3xl font-black", result.risk ? "text-rose-500" : "text-emerald-500")}>
+                                                    {result.risk ? "High Risk Detected" : "Low Risk Detected"}
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="text-center space-y-6">
+                                                <div className="space-y-2">
+                                                    <div className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Confidence Score</div>
+                                                    <div className="text-6xl font-black text-foreground tracking-tight">
+                                                        {(result.probability * 100).toFixed(1)}%
+                                                    </div>
+                                                </div>
+
+                                                <div className="p-4 rounded-xl bg-card border border-border text-left text-sm text-foreground">
+                                                    <h4 className="font-bold mb-2 flex items-center gap-2">
+                                                        <Activity className="w-4 h-4" /> Recommendation:
+                                                    </h4>
+                                                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                                                        {result.risk ? (
+                                                            <>
+                                                                <li>Consult a cardiologist immediately.</li>
+                                                                <li>Monitor blood pressure daily.</li>
+                                                                <li>Review lifestyle factors (Diet/Exercise).</li>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <li>Maintain current healthy lifestyle.</li>
+                                                                <li>Regular annual checkups.</li>
+                                                                <li>Stay hydrated and active.</li>
+                                                            </>
+                                                        )}
+                                                    </ul>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
                                     </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                ) : (
+                                    <div className="sticky top-24">
+                                        <div className="glass-panel p-8 rounded-3xl border border-white/5 text-center py-20 bg-card/50">
+                                            <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+                                                <Activity className="w-8 h-8 text-muted-foreground" />
+                                            </div>
+                                            <h3 className="text-xl font-bold text-muted-foreground mb-2">Awaiting Data</h3>
+                                            <p className="text-muted-foreground">Complete the form to initiate the analysis engine.</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
                     </div>
                 </div>
             </div>

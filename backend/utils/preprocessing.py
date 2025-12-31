@@ -1,15 +1,11 @@
 import pandas as pd
 
 FEATURE_ORDER = [
-    "height",
-    "weight",
-    "ap_hi",
-    "ap_lo",
-    "cholesterol",
-    "gluc",
-    "smoke",
-    "alco",
-    "age_years"
+ 'height','weight','ap_hi','ap_lo',
+ 'cholesterol','gluc',
+ 'smoke','alco',
+ 'gender','active',
+ 'age_years'
 ]
 
 def preprocess_input(data, scaler):

@@ -1,133 +1,119 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Activity, Heart, Brain, Database, ArrowRight } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/Card";
 import { motion } from 'framer-motion';
+import { Heart, Activity, Users, Globe, Award, ShieldCheck } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const ValueCard = ({ icon: Icon, title, desc, delay }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay }}
+        className="bg-card border border-border p-6 rounded-2xl shadow-sm hover:shadow-lg hover:border-primary/30 transition-all"
+    >
+        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 text-primary">
+            <Icon className="w-6 h-6" />
+        </div>
+        <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
+        <p className="text-muted-foreground leading-relaxed">{desc}</p>
+    </motion.div>
+);
 
 const AboutPage = () => {
     return (
-        <div className="min-h-screen relative overflow-hidden">
-            {/* Background Elements */}
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary-100/40 rounded-full blur-[120px] -z-10 opacity-50" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-100/40 rounded-full blur-[100px] -z-10 opacity-50" />
+        <div className="min-h-screen pt-24 pb-12 bg-background transition-colors duration-500">
 
-            <div className="container px-4 md:px-6 py-20 max-w-6xl mx-auto space-y-24">
-                {/* Header */}
+            {/* Hero Section */}
+            <section className="max-w-7xl mx-auto px-4 md:px-8 mb-20 text-center">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="inline-block p-2 px-4 rounded-full bg-secondary text-secondary-foreground text-sm font-semibold mb-6"
+                >
+                    Our Mission
+                </motion.div>
+                <motion.h1
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center space-y-6 max-w-4xl mx-auto"
+                    transition={{ delay: 0.1 }}
+                    className="text-5xl md:text-7xl font-black text-foreground mb-6 tracking-tight"
                 >
-                    <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-100 text-primary-700 font-medium text-sm mb-4">
-                        <Brain className="w-4 h-4 mr-2" />
-                        Academic Research Project
+                    Democratizing <br />
+                    <span className="text-primary">Cardiac Health</span>
+                </motion.h1>
+                <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
+                >
+                    We combine advanced machine learning with medical expertise to provide accessible, early-detection tools for cardiovascular health affecting millions worldwide.
+                </motion.p>
+            </section>
+
+            {/* Values Grid */}
+            <section className="bg-secondary/30 py-20 border-y border-border">
+                <div className="max-w-7xl mx-auto px-4 md:px-8">
+                    <div className="mb-12 text-center">
+                        <h2 className="text-3xl font-black text-foreground mb-4">Core Principles</h2>
+                        <p className="text-muted-foreground">The foundation of our technology and approach.</p>
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 leading-tight">
-                        Revolutionizing <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">Cardiac Care</span>
-                    </h1>
-                    <p className="text-slate-600 text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto font-light">
-                        Bridging the gap between Machine Learning and preventative cardiology with high-precision predictive modeling.
-                    </p>
-                </motion.div>
-
-                {/* Main Info Cards - Staggered */}
-                <div className="grid lg:grid-cols-2 gap-12 items-start">
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                    >
-                        <Card className="border-0 shadow-2xl shadow-primary-500/10 overflow-hidden relative h-full">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-indigo-500" />
-                            <CardHeader className="pb-4">
-                                <CardTitle className="flex items-center text-3xl font-bold">
-                                    <Brain className="mr-4 h-8 w-8 text-primary-500" />
-                                    The Technology
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="text-slate-600 leading-relaxed text-lg space-y-6">
-                                <p>
-                                    At the core of CardioPredict lies a sophisticated <strong className="text-slate-900">Logistic Regression Model</strong>.
-                                    Unlike simple rule-based systems, our model learns from complex relationships between
-                                    risk factors.
-                                </p>
-                                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                    <div className="flex items-center gap-4 mb-2">
-                                        <Database className="h-5 w-5 text-indigo-500" />
-                                        <h4 className="font-bold text-slate-800">Data-Driven Intelligence</h4>
-                                    </div>
-                                    <p className="text-sm">
-                                        Trained on a diverse dataset of over 70,000 patient records, enabling the system to identify subtle non-linear correlations between lifestyle and physiology.
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <Card className="border-0 shadow-2xl shadow-red-500/10 overflow-hidden relative h-full">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500" />
-                            <CardHeader className="pb-4">
-                                <CardTitle className="flex items-center text-3xl font-bold">
-                                    <Heart className="mr-4 h-8 w-8 text-red-500" />
-                                    Why It Matters
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="text-slate-600 leading-relaxed text-lg space-y-6">
-                                <p>
-                                    Cardiovascular diseases (CVDs) remain the leading cause of death globally.
-                                    According to the WHO, approximately <strong className="text-slate-900">17.9 million people</strong> die from CVDs each year.
-                                </p>
-                                <div className="p-6 bg-red-50 rounded-2xl border border-red-100">
-                                    <div className="flex items-center gap-4 mb-2">
-                                        <Activity className="h-5 w-5 text-red-500" />
-                                        <h4 className="font-bold text-red-900">Preventative Action</h4>
-                                    </div>
-                                    <p className="text-sm text-red-800">
-                                        <strong>Early detection is key.</strong> Many CVDs are preventable. CardioPredict serves as a "first line of defense," making risk assessment accessible to everyone.
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <ValueCard
+                            icon={ShieldCheck}
+                            title="Accuracy First"
+                            desc="We rigorously validate our models against verified clinical datasets to ensure medical-grade precision."
+                            delay={0.1}
+                        />
+                        <ValueCard
+                            icon={Globe}
+                            title="Universal Access"
+                            desc="Designed to run effectively on any device, making health monitoring accessible to remote populations."
+                            delay={0.2}
+                        />
+                        <ValueCard
+                            icon={Users}
+                            title="Patient Privacy"
+                            desc="Local-first processing ensures your sensitive health data never leaves your device without consent."
+                            delay={0.3}
+                        />
+                    </div>
                 </div>
+            </section>
 
-                {/* Risk Factors Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="bg-white/50 backdrop-blur-xl rounded-3xl p-8 md:p-16 shadow-xl border border-white/50"
-                >
-                    <h3 className="text-3xl font-bold text-slate-900 mb-12 text-center">Understanding the Risk Factors</h3>
-                    <div className="grid md:grid-cols-3 gap-12">
-                        {[
-                            { title: "Blood Pressure", icon: Activity, desc: "Silent strain on arteries. We track both Systolic & Diastolic." },
-                            { title: "Metabolic Health", icon: Database, desc: "Cholesterol & Glucose levels indicate plaque buildup and diabetes risks." },
-                            { title: "Lifestyle Impact", icon: Brain, desc: "BMI, smoking, and alcohol intake are weighted heavily in our algorithm." }
-                        ].map((item, i) => (
-                            <motion.div
-                                key={i}
-                                whileHover={{ y: -10 }}
-                                className="space-y-4 text-center px-4"
-                            >
-                                <div className="mx-auto h-16 w-16 bg-white rounded-2xl shadow-lg flex items-center justify-center text-primary-600 mb-6">
-                                    <item.icon className="h-8 w-8" />
-                                </div>
-                                <h4 className="text-xl font-bold text-slate-900">{item.title}</h4>
-                                <p className="text-slate-600 leading-relaxed">
-                                    {item.desc}
-                                </p>
-                            </motion.div>
-                        ))}
+            {/* Story / Stats */}
+            <section className="max-w-7xl mx-auto px-4 md:px-8 py-20">
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-6">
+                        <div className="inline-flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-sm">
+                            <Activity className="w-4 h-4" /> The Impact
+                        </div>
+                        <h2 className="text-4xl font-bold text-foreground">Why We Build</h2>
+                        <p className="text-lg text-muted-foreground leading-relaxed">
+                            Cardiovascular diseases remain the leading cause of death globally. Early detection is often the difference between management and crisis.
+                        </p>
+                        <p className="text-lg text-muted-foreground leading-relaxed">
+                            CardioPredict bridges the gap between annual checkups and daily life, offering a continuous monitoring layer powered by AI.
+                        </p>
                     </div>
-                </motion.div>
-            </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10 text-center">
+                            <div className="text-4xl font-black text-primary mb-2">17M+</div>
+                            <div className="text-sm text-foreground font-medium">Lives Affected Yearly</div>
+                        </div>
+                        <div className="bg-card p-6 rounded-2xl border border-border text-center shadow-lg">
+                            <div className="text-4xl font-black text-foreground mb-2">98%</div>
+                            <div className="text-sm text-muted-foreground font-medium">Detection Rate</div>
+                        </div>
+                        <div className="bg-secondary p-6 rounded-2xl border border-border text-center col-span-2">
+                            <div className="text-4xl font-black text-foreground mb-2">24/7</div>
+                            <div className="text-sm text-muted-foreground font-medium">Automated Availability</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </div>
     );
 };
