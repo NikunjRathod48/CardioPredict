@@ -187,6 +187,3 @@ If you like this project, please ⭐ the repo — it motivates a lot!
 ### 🧡 Thank You for Visiting CardioPredict AI
 
 Helping technology support healthier hearts, one prediction at a time.
-
-```
-```
