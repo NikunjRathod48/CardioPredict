@@ -1,237 +1,198 @@
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/Card";
-import { motion } from 'framer-motion';
-import { Brain, Database, Activity, GitBranch, CheckCircle2, BarChart3, Info } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useState } from 'react';
+import { motion, useSpring, useTransform } from 'framer-motion';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Database, Binary, BarChart3, TrendingUp, Cpu, Layers, BrainCircuit } from 'lucide-react';
+import Card from '@/components/ui/Card';
 
-const MetricCard = ({ label, value, subtext, icon: Icon, delay }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay, duration: 0.5 }}
-        className="bg-card border border-border p-6 rounded-2xl shadow-sm hover:shadow-md transition-all"
-    >
-        <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-primary/10 rounded-xl text-primary">
-                <Icon className="w-6 h-6" />
-            </div>
-            {subtext && <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-1 rounded-full">{subtext}</span>}
-        </div>
-        <div className="text-3xl font-black text-foreground mb-1">{value}</div>
-        <div className="text-sm font-medium text-muted-foreground">{label}</div>
-    </motion.div>
-);
+const CountUp = ({ value, suffix = '', duration = 1.5 }) => {
+    const spring = useSpring(0, { duration: duration * 1000, bounce: 0 });
+    const display = useTransform(spring, (current) =>
+        Math.floor(current).toLocaleString() + suffix
+    );
 
-const FeatureItem = ({ name, importance, description, delay }) => (
-    <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay }}
-        className="group p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-accent/50 transition-all cursor-default"
-    >
-        <div className="flex justify-between items-center mb-2">
-            <span className="font-bold text-foreground group-hover:text-primary transition-colors">{name}</span>
-            <span className="text-sm font-mono text-muted-foreground">{importance}% Impact</span>
-        </div>
-        <div className="h-2 bg-secondary rounded-full overflow-hidden mb-2">
-            <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: `${importance}%` }}
-                transition={{ duration: 1, ease: "circOut", delay: delay + 0.2 }}
-                className="h-full bg-primary"
-            />
-        </div>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-            {description}
-        </p>
-    </motion.div>
-);
+    useEffect(() => {
+        spring.set(value);
+    }, [value, spring]);
 
-const ModelInfoPage = () => {
+    return <motion.span>{display}</motion.span>;
+};
+
+const ModelInfo = () => {
+
+    const metricsData = [
+        { name: 'Class 0 (Healthy)', Precision: 0.70, Recall: 0.76, F1: 0.73 },
+        { name: 'Class 1 (At Risk)', Precision: 0.75, Recall: 0.68, F1: 0.71 },
+    ];
+
+    const featureImportance = [
+        { name: 'Sys. BP', value: 0.35 },
+        { name: 'Age', value: 0.25 },
+        { name: 'Cholest.', value: 0.15 },
+        { name: 'BMI', value: 0.12 },
+        { name: 'Glucose', value: 0.08 },
+        { name: 'Activity', value: 0.05 },
+    ];
+
+    const confusionMatrix = [
+        { type: 'TN', value: 4926, label: 'True Negative', desc: 'Correctly identified healthy', color: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' },
+        { type: 'FP', value: 1531, label: 'False Positive', desc: 'Incorrectly flagged risk', color: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-800' },
+        { type: 'FN', value: 2148, label: 'False Negative', desc: 'Missed disease case', color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-800' },
+        { type: 'TP', value: 4490, label: 'True Positive', desc: 'Correctly identified risk', color: 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border-teal-100 dark:border-teal-800' },
+    ];
+
     return (
-        <div className="min-h-screen pt-24 pb-12 px-4 md:px-8 bg-background relative overflow-hidden transition-colors duration-500">
-            {/* Background Gradients */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="max-w-6xl mx-auto space-y-16 pb-20">
+            {/* Header */}
+            <div className="text-center space-y-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider"
+                >
+                    <BrainCircuit className="w-4 h-4" /> Technical Documentation
+                </motion.div>
+                <h1 className="text-4xl md:text-5xl font-display font-bold text-slate-900 dark:text-white">
+                    Model Architecture & Performance
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto text-lg">
+                    Transparent evaluation of our Logistic Regression algorithm trained on 13,000+ clinical samples for cardiovascular risk stratification.
+                </p>
+            </div>
 
-            <div className="max-w-7xl mx-auto relative z-10">
+            {/* Top Level Stats (Animated) */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {[
+                    { icon: TrendingUp, val: 71.9, label: 'Accuracy', suffix: '%', color: 'teal' },
+                    { icon: Database, val: 13095, label: 'Dataset Samples', suffix: '', color: 'slate' },
+                    { icon: Binary, val: 2, label: 'Output Classes', suffix: '', color: 'sky' },
+                    { icon: BarChart3, val: 0.72, label: 'Macro F1', suffix: '', color: 'indigo' }
+                ].map((item, i) => (
+                    <Card key={i} className={`flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-${item.color}-500 dark:bg-slate-900`}>
+                        <span className={`p-3 bg-${item.color}-50 dark:bg-${item.color}-900/20 rounded-full text-${item.color}-600 dark:text-${item.color}-400 mb-2`}>
+                            <item.icon className="w-6 h-6" />
+                        </span>
+                        <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                            <CountUp value={item.val} suffix={item.suffix} />
+                        </span>
+                        <span className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{item.label}</span>
+                    </Card>
+                ))}
+            </div>
 
-                {/* Header */}
-                <div className="mb-12 text-center md:text-left">
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-semibold uppercase tracking-wider mb-4"
-                    >
-                        <GitBranch className="w-3 h-3" />
-                        Logistic Regression v1.2
-                    </motion.div>
-                    <motion.h1
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl md:text-5xl font-black text-foreground tracking-tight mb-4"
-                    >
-                        Model <span className="text-primary">Performance</span>
-                    </motion.h1>
-                    <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-lg text-muted-foreground max-w-2xl"
-                    >
-                        Transparency in AI decision making. Review the metrics and logic powering the CardioPredict engine.
-                    </motion.p>
-                </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Confusion Matrix Visualization */}
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="space-y-6"
+                >
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <Layers className="w-6 h-6 text-teal-500" /> Confusion Matrix
+                    </h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        {confusionMatrix.map((item, i) => (
+                            <Card key={i} className={`text-center space-y-1 border ${item.color} dark:bg-transparent`}>
+                                <div className="text-3xl font-bold"><CountUp value={item.value} /></div>
+                                <div className="font-bold text-sm uppercase opacity-90">{item.type}</div>
+                                <div className="text-xs opacity-75">{item.desc}</div>
+                            </Card>
+                        ))}
+                    </div>
+                </motion.div>
 
-                {/* Key Metrics Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                    <MetricCard
-                        label="Model Accuracy"
-                        value="98.5%"
-                        subtext="Top Tier"
-                        icon={CheckCircle2}
-                        delay={0.1}
-                    />
-                    <MetricCard
-                        label="Training Samples"
-                        value="70,000+"
-                        subtext="Verified Data"
-                        icon={Database}
-                        delay={0.2}
-                    />
-                    <MetricCard
-                        label="Input Parameters"
-                        value="12"
-                        subtext="Bio-Markers"
-                        icon={Activity}
-                        delay={0.3}
-                    />
-                    <MetricCard
-                        label="Inference Time"
-                        value="~15ms"
-                        subtext="Real-time"
-                        icon={Brain}
-                        delay={0.4}
-                    />
-                </div>
-
-                {/* Content Split */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                    {/* Left: Feature Importance */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        className="lg:col-span-1 space-y-6"
-                    >
-                        <Card className="bg-card/50 backdrop-blur-sm border-border h-full">
-                            <CardHeader>
-                                <CardTitle className="text-xl flex items-center gap-2">
-                                    <BarChart3 className="w-5 h-5 text-primary" />
-                                    Feature Weights
-                                </CardTitle>
-                                <CardDescription>Factors influencing risk calculation most.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <FeatureItem
-                                    name="Systolic BP"
-                                    importance={85}
-                                    description="High blood pressure is the strongest indicator of cardiovascular stress."
-                                    delay={0.1}
+                {/* Metric Charts */}
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="space-y-6"
+                >
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <BarChart3 className="w-6 h-6 text-indigo-500" /> Classification Metrics
+                    </h2>
+                    <Card className="h-[300px] flex items-center justify-center p-0 overflow-hidden dark:bg-slate-900">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={metricsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} domain={[0, 1]} />
+                                <Tooltip
+                                    cursor={{ fill: 'transparent' }}
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
                                 />
-                                <FeatureItem
-                                    name="Age"
-                                    importance={70}
-                                    description="Risk naturally increases as arterial elasticity decreases over time."
-                                    delay={0.2}
-                                />
-                                <FeatureItem
-                                    name="Cholesterol"
-                                    importance={65}
-                                    description="Elevated levels significantly contribute to arterial plaque buildup."
-                                    delay={0.3}
-                                />
-                                <FeatureItem
-                                    name="BMI / Weight"
-                                    importance={50}
-                                    description="Body mass correlates strongly with heart workload and efficiency."
-                                    delay={0.4}
-                                />
-                            </CardContent>
-                        </Card>
-                    </motion.div>
+                                <Legend wrapperStyle={{ paddingTop: '10px' }} />
+                                <Bar dataKey="Precision" fill="#0ea5e9" radius={[4, 4, 0, 0]} animationDuration={1500} />
+                                <Bar dataKey="Recall" fill="#14b8a6" radius={[4, 4, 0, 0]} animationDuration={1500} />
+                                <Bar dataKey="F1" fill="#6366f1" radius={[4, 4, 0, 0]} animationDuration={1500} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </Card>
+                </motion.div>
+            </div>
 
-                    {/* Right: Confusion Matrix / Technical Details */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        className="lg:col-span-2"
-                    >
-                        <Card className="bg-card border-border h-full overflow-hidden">
-                            <CardHeader>
-                                <CardTitle className="text-xl flex items-center gap-2">
-                                    <Brain className="w-5 h-5 text-primary" />
-                                    Prediction Logic & Confusion Matrix
-                                </CardTitle>
-                                <CardDescription>How the model categorizes True and False positives/negatives.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-2 gap-4 mb-8">
-                                    {/* Matrix Visual */}
-                                    <div className="aspect-video bg-secondary/50 rounded-xl relative flex items-center justify-center border border-border p-4">
-                                        <div className="grid grid-cols-2 gap-2 w-full h-full max-w-sm">
-                                            <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex flex-col items-center justify-center p-2 text-center">
-                                                <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">TP</span>
-                                                <span className="text-xs text-muted-foreground">True Positive</span>
-                                            </div>
-                                            <div className="bg-rose-500/10 border border-rose-500/20 rounded-lg flex flex-col items-center justify-center p-2 text-center opacity-50">
-                                                <span className="text-xl font-bold text-rose-500">FP</span>
-                                                <span className="text-xs text-muted-foreground">False Positive</span>
-                                            </div>
-                                            <div className="bg-rose-500/10 border border-rose-500/20 rounded-lg flex flex-col items-center justify-center p-2 text-center opacity-50">
-                                                <span className="text-xl font-bold text-rose-500">FN</span>
-                                                <span className="text-xs text-muted-foreground">False Negative</span>
-                                            </div>
-                                            <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex flex-col items-center justify-center p-2 text-center">
-                                                <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">TN</span>
-                                                <span className="text-xs text-muted-foreground">True Negative</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Explanation Text */}
-                                    <div className="flex flex-col justify-center space-y-4">
-                                        <div className="space-y-2">
-                                            <h4 className="font-semibold text-foreground flex items-center gap-2">
-                                                <Info className="w-4 h-4 text-primary" />
-                                                Algorithm Strategy
-                                            </h4>
-                                            <p className="text-sm text-muted-foreground leading-relaxed">
-                                                The model operates on a sigmoid activation function, calculating probabilities between 0 and 1. A threshold of 0.5 discriminates between 'Healthy' and 'At Risk' predictions.
-                                            </p>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <h4 className="font-semibold text-foreground flex items-center gap-2">
-                                                <CheckCircle2 className="w-4 h-4 text-primary" />
-                                                Optimization
-                                            </h4>
-                                            <p className="text-sm text-muted-foreground leading-relaxed">
-                                                We prioritize <span className="text-foreground font-medium">Recall</span> over Precision to minimize False Negatives, ensuring that potential risks are flagged for professional review rather than missed.
-                                            </p>
-                                        </div>
-                                    </div>
+            {/* Feature Importance & Methodology */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-8">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                >
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <Cpu className="w-6 h-6 text-rose-500" /> Feature Importance
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400">
+                        Which factors contribute most to the risk prediction?
+                    </p>
+                    <div className="space-y-4">
+                        {featureImportance.map((item, i) => (
+                            <div key={i} className="space-y-1">
+                                <div className="flex justify-between text-sm font-medium">
+                                    <span className="text-slate-700 dark:text-slate-300">{item.name}</span>
+                                    <span className="text-slate-500">{(item.value * 100).toFixed(0)}%</span>
                                 </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                </div>
+                                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        whileInView={{ width: `${item.value * 100}%` }}
+                                        transition={{ duration: 1, delay: i * 0.1 }}
+                                        className="h-full bg-gradient-to-r from-teal-400 to-teal-600 rounded-full"
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
 
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="space-y-6"
+                >
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <Database className="w-6 h-6 text-sky-500" /> Training Methodology
+                    </h2>
+                    <div className="prose dark:prose-invert text-slate-600 dark:text-slate-400">
+                        <p>
+                            The model utilizes <strong>Logistic Regression</strong>, a statistical method for analyzing a dataset in which there are one or more independent variables that determine an outcome.
+                        </p>
+                        <ul className="space-y-2 list-disc pl-5 mt-4">
+                            <li>
+                                <strong>Data Preprocessing:</strong> Outliers in height/weight were capped using IQR method. Blood pressure values were normalized.
+                            </li>
+                            <li>
+                                <strong>Validation:</strong> We used 80/20 Train-Test split with k-fold cross-validation to ensure robustness.
+                            </li>
+                            <li>
+                                <strong>Bias Mitigation:</strong> The dataset was balanced to prevent class dominance, ensuring the model is equally sensitive to positive and negative cases.
+                            </li>
+                        </ul>
+                    </div>
+                </motion.div>
             </div>
         </div>
     );
 };
 
-export default ModelInfoPage;
+export default ModelInfo;

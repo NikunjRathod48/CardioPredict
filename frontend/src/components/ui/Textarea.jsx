@@ -1,23 +1,35 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
 
-const Textarea = React.forwardRef(({ className, label, error, ...props }, ref) => {
+const Textarea = React.forwardRef(({ label, error, className = '', ...props }, ref) => {
     return (
-        <div className="w-full space-y-1.5">
-            {label && <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">{label}</label>}
+        <div className="w-full space-y-2">
+            {label && (
+                <label className="block text-sm font-medium text-slate-700 ml-1">
+                    {label}
+                </label>
+            )}
             <textarea
-                className={cn(
-                    "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                    error && "border-destructive focus-visible:ring-destructive",
-                    className
-                )}
                 ref={ref}
+                className={`
+                    w-full px-4 py-3 rounded-xl border bg-slate-50/50 text-slate-900 placeholder:text-slate-400
+                    text-sm transition-all duration-200 min-h-[120px] resize-y
+                    focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    ${error
+                        ? 'border-red-300 focus:ring-red-200 focus:border-red-400'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }
+                    ${className}
+                `}
                 {...props}
             />
-            {error && <p className="text-xs text-destructive font-medium">{error}</p>}
+            {error && (
+                <p className="text-xs text-red-500 font-medium ml-1 animate-pulse-soft">
+                    {error}
+                </p>
+            )}
         </div>
     );
 });
-Textarea.displayName = "Textarea";
 
-export { Textarea };
+export default Textarea;

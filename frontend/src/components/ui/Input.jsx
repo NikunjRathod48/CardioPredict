@@ -1,24 +1,41 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
 
-const Input = React.forwardRef(({ className, type, label, error, ...props }, ref) => {
+const Input = React.forwardRef(({ label, error, helperText, className = '', ...props }, ref) => {
     return (
         <div className="w-full space-y-1.5">
-            {label && <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-700">{label}</label>}
-            <input
-                type={type}
-                className={cn(
-                    "flex h-11 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-                    error && "border-destructive focus-visible:ring-destructive",
-                    className
-                )}
-                ref={ref}
-                {...props}
-            />
-            {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
+            {label && (
+                <label className="block text-sm font-semibold text-foreground ml-1">
+                    {label}
+                </label>
+            )}
+            <div className="relative group">
+                <input
+                    ref={ref}
+                    className={`
+                        w-full px-4 py-3.5 rounded-xl border bg-input/20 text-foreground placeholder:text-muted-foreground
+                        text-sm font-medium transition-all duration-300
+                        focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring focus:bg-card
+                        hover:border-accent-foreground/30
+                        disabled:opacity-60 disabled:cursor-not-allowed
+                        ${error
+                            ? 'border-destructive focus:ring-destructive/20 focus:border-destructive bg-destructive/5'
+                            : 'border-input'
+                        }
+                        ${className}
+                    `}
+                    {...props}
+                />
+            </div>
+            {helperText && !error && (
+                <p className="text-xs text-muted-foreground ml-1">{helperText}</p>
+            )}
+            {error && (
+                <p className="text-xs text-destructive font-medium ml-1 animate-fadeInUp">
+                    {error}
+                </p>
+            )}
         </div>
     );
 });
-Input.displayName = "Input";
 
-export { Input };
+export default Input;

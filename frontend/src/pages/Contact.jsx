@@ -1,120 +1,85 @@
-import React, { useState } from 'react';
-import { Card } from "@/components/ui/Card";
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Mail, MessageSquare, Send, MapPin, Phone } from 'lucide-react';
+import { Mail, Github, Linkedin, MessageSquare, ExternalLink } from 'lucide-react';
+import Card from '@/components/ui/Card';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import Button from '@/components/ui/Button';
 
-const ContactPage = () => {
-    const [loading, setLoading] = useState(false);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setLoading(true);
-        // Simulate sending
-        setTimeout(() => setLoading(false), 2000);
-    };
-
+const Contact = () => {
     return (
-        <div className="min-h-screen pt-24 pb-12 bg-background relative overflow-hidden transition-colors duration-500">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-start pb-20">
 
-            {/* Split Layout */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+            {/* Left Column: Info */}
+            <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                className="space-y-8 md:sticky md:top-32"
+            >
+                <div>
+                    <h1 className="text-4xl font-display font-bold text-slate-900 mb-4">
+                        Get in Touch
+                    </h1>
+                    <p className="text-lg text-slate-600 leading-relaxed">
+                        Interested in the model architecture or want to collaborate? Reach out directly via the form or my social channels.
+                    </p>
+                </div>
 
-                {/* Left Side: Info */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-8"
-                >
-                    <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-4">
-                            <MessageSquare className="w-4 h-4" /> Get in Touch
+                <div className="space-y-4">
+                    <Card className="flex items-center gap-4 hover:border-teal-200 transition-colors cursor-pointer" hoverEffect onClick={() => window.open('https://github.com/NikunjRathod48', '_blank')}>
+                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-700">
+                            <Github className="w-6 h-6" />
                         </div>
-                        <h1 className="text-5xl font-black text-foreground mb-4">
-                            We'd love to <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">hear from you.</span>
-                        </h1>
-                        <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
-                            Have questions about the model? Want to contribute to the research? Drop us a line.
-                        </p>
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="flex items-start gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors">
-                            <div className="p-3 bg-secondary rounded-lg text-primary">
-                                <Mail className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-foreground">Email Us</h3>
-                                <p className="text-muted-foreground">research@cardiopredict.edu</p>
-                            </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-slate-900">GitHub Profile</h3>
+                            <p className="text-sm text-slate-500">Explore the source code</p>
                         </div>
-                        <div className="flex items-start gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors">
-                            <div className="p-3 bg-secondary rounded-lg text-primary">
-                                <MapPin className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-foreground">Campus Lab</h3>
-                                <p className="text-muted-foreground">Engineering Block C, Room 404</p>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-
-                {/* Right Side: Form */}
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                >
-                    <Card className="bg-card border-border shadow-xl p-8 md:p-10 relative overflow-hidden">
-                        {/* Decorative Gradient Line */}
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-indigo-500" />
-
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-foreground">First Name</label>
-                                    <Input placeholder="Jane" className="bg-background border-input text-foreground h-12" required />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-foreground">Last Name</label>
-                                    <Input placeholder="Doe" className="bg-background border-input text-foreground h-12" required />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-foreground">Email Address</label>
-                                <Input type="email" placeholder="jane@example.com" className="bg-background border-input text-foreground h-12" required />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-foreground">Message</label>
-                                <Textarea
-                                    placeholder="Tell us what you think..."
-                                    className="bg-background border-input text-foreground min-h-[150px] resize-none"
-                                    required
-                                />
-                            </div>
-
-                            <Button
-                                type="submit"
-                                className="w-full h-14 text-lg font-bold rounded-xl"
-                                disabled={loading}
-                            >
-                                {loading ? 'Sending...' : (
-                                    <span className="flex items-center gap-2">Send Message <Send className="w-4 h-4" /></span>
-                                )}
-                            </Button>
-                        </form>
+                        <ExternalLink className="w-4 h-4 text-slate-400" />
                     </Card>
-                </motion.div>
 
-            </div>
+                    <Card className="flex items-center gap-4 hover:border-blue-200 transition-colors cursor-pointer" hoverEffect onClick={() => window.open('https://linkedin.com/in/NikunjRathod48', '_blank')}>
+                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                            <Linkedin className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-slate-900">LinkedIn</h3>
+                            <p className="text-sm text-slate-500">Professional network</p>
+                        </div>
+                        <ExternalLink className="w-4 h-4 text-slate-400" />
+                    </Card>
+                </div>
+            </motion.div>
+
+            {/* Right Column: Form */}
+            <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+            >
+                <Card className="p-8 shadow-xl shadow-slate-200/50">
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-slate-900">Send a Message</h2>
+                        <p className="text-slate-500">I usually respond within 24 hours.</p>
+                    </div>
+
+                    <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                        <div className="grid grid-cols-2 gap-5">
+                            <Input label="First Name" placeholder="Jane" />
+                            <Input label="Last Name" placeholder="Doe" />
+                        </div>
+                        <Input label="Email Address" type="email" placeholder="jane@example.com" />
+                        <Input label="Subject" placeholder="Collaboration / Inquiry" />
+                        <Textarea label="Message" placeholder="How can I help you?" className="min-h-[150px]" />
+
+                        <Button className="w-full text-lg h-12 shadow-lg shadow-teal-500/20">
+                            Send Message
+                        </Button>
+                    </form>
+                </Card>
+            </motion.div>
         </div>
     );
 };
 
-export default ContactPage;
+export default Contact;

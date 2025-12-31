@@ -7,13 +7,8 @@ import ScrollToTop from '@/components/ScrollToTop';
 
 // Pages
 import HomePage from '@/pages/Home';
-import AboutPage from '@/pages/About';
 import PredictPage from '@/pages/Predict';
 import ModelInfoPage from '@/pages/ModelInfo';
-import ContactPage from '@/pages/Contact';
-
-// 3D Background (Lazy load if heavy, but standard import is fine for now)
-import BackgroundScene from '@/components/3d/BackgroundScene';
 
 // Transition Wrapper for handling routes
 const AnimatedRoutes = () => {
@@ -23,35 +18,46 @@ const AnimatedRoutes = () => {
         <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/about" element={<AboutPage />} />
                 <Route path="/predict" element={<PredictPage />} />
                 <Route path="/model-info" element={<ModelInfoPage />} />
-                <Route path="/contact" element={<ContactPage />} />
             </Routes>
         </AnimatePresence>
     );
 };
 
-import { ThemeProvider } from "@/context/ThemeContext"
+// Removed ThemeProvider as we are enforcing Light Mode only for this redesign -- RE-ADDED FOR DARK MODE
+import { ThemeProvider } from '@/context/ThemeContext';
 
 function App() {
     return (
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <ThemeProvider>
             <Router>
                 <ScrollToTop />
-                <Toaster position="top-right" toastOptions={{
-                    className: 'glass-panel text-foreground border-border',
-                    style: {
-                        background: 'hsl(var(--background))',
-                        color: 'hsl(var(--foreground))',
-                        border: '1px solid hsl(var(--border))',
-                    },
-                }} />
-
-                {/* Persistent 3D Background */}
-                <Suspense fallback={<div className="fixed inset-0 bg-background" />}>
-                    <BackgroundScene />
-                </Suspense>
+                <Toaster
+                    position="top-center"
+                    reverseOrder={false}
+                    toastOptions={{
+                        className: 'glass text-slate-900 dark:text-white shadow-soft dark:shadow-depth-dark rounded-xl px-6 py-4 font-medium',
+                        duration: 4000,
+                        style: {
+                            background: 'rgba(255, 255, 255, 0.9)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255, 255, 255, 0.5)',
+                        },
+                        success: {
+                            iconTheme: {
+                                primary: '#0d9488', // Teal-600
+                                secondary: '#fff',
+                            },
+                        },
+                        error: {
+                            iconTheme: {
+                                primary: '#fb7185', // Rose-400
+                                secondary: '#fff',
+                            },
+                        },
+                    }}
+                />
 
                 <Layout>
                     <AnimatedRoutes />
