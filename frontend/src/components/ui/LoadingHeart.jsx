@@ -29,8 +29,8 @@ const LoadingHeart = ({ text = "Analyzing Vitals..." }) => {
             </div>
 
             <div className="text-center space-y-1">
-                <h3 className="text-lg font-display font-semibold text-slate-800">{text}</h3>
-                <p className="text-sm text-slate-500">Processing medical data</p>
+                <h3 className="text-lg font-display font-semibold text-slate-800 dark:text-white">{text}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Processing medical data</p>
             </div>
 
             {/* ECG Line Animation */}
@@ -47,7 +47,7 @@ const LoadingHeart = ({ text = "Analyzing Vitals..." }) => {
                     <motion.rect
                         width="100%"
                         height="100%"
-                        fill="white"
+                        className="fill-white dark:fill-slate-950"
                         initial={{ x: "0%" }}
                         animate={{ x: "100%" }}
                         transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
