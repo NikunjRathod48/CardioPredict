@@ -7,10 +7,10 @@ import Card from '@/components/ui/Card';
 
 // --- Utility Components ---
 
-const CountUp = ({ value, suffix = '', duration = 1.5 }) => {
+const CountUp = ({ value, suffix = '', duration = 1.5, decimals = 0 }) => {
     const spring = useSpring(0, { duration: duration * 1000, bounce: 0 });
     const display = useTransform(spring, (current) =>
-        Math.floor(current).toLocaleString() + suffix
+        current.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + suffix
     );
 
     useEffect(() => {
@@ -19,6 +19,8 @@ const CountUp = ({ value, suffix = '', duration = 1.5 }) => {
 
     return <motion.span>{display}</motion.span>;
 };
+
+
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -104,39 +106,67 @@ const ModelInfo = () => {
     const [data, setData] = useState(null);
 
     useEffect(() => {
+        const transformBackendData = (apiResponse) => {
+            const m = apiResponse.metrics;
+            if (!m) return null;
+
+            // Zip ROC data
+            const rocData = m.roc_curve.fpr.map((f, i) => ({
+                fpr: f,
+                tpr: m.roc_curve.tpr[i] || 0
+            }));
+
+            return {
+                accuracy: (m.accuracy * 100).toFixed(1),
+                dataset_samples: m.dataset_samples,
+                output_classes: 2,
+                macro_f1: m.class_report.macro_f1.toFixed(2),
+                confusion_matrix: [
+                    { type: 'TN', value: m.confusion_matrix.tn, label: 'True Negative', desc: 'Correctly identified healthy', color: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' },
+                    { type: 'FP', value: m.confusion_matrix.fp, label: 'False Positive', desc: 'Incorrectly flagged risk', color: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-800' },
+                    { type: 'FN', value: m.confusion_matrix.fn, label: 'False Negative', desc: 'Missed disease case', color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-800' },
+                    { type: 'TP', value: m.confusion_matrix.tp, label: 'True Positive', desc: 'Correctly identified risk', color: 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border-teal-100 dark:border-teal-800' },
+                ],
+                classification_metrics: [
+                    {
+                        name: 'Healthy (No Risk)',
+                        Precision: m.class_report.class_0.precision,
+                        Recall: m.class_report.class_0.recall,
+                        F1: m.class_report.class_0.f1
+                    },
+                    {
+                        name: 'At Risk (Positive)',
+                        Precision: m.class_report.class_1.precision,
+                        Recall: m.class_report.class_1.recall,
+                        F1: m.class_report.class_1.f1
+                    },
+                ],
+                feature_importance: m.feature_importance,
+                roc_data: rocData,
+                // Keep static SHAP data as it is not provided by backend
+                shap_data: DEFAULT_METRICS.shap_data
+            };
+        };
+
         const fetchMetrics = async () => {
             try {
                 // Simulate network delay for premium feel
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, 800));
 
                 const response = await fetch('https://cardio-backend-itbt.onrender.com/model-metrics');
                 if (!response.ok) throw new Error('Failed to fetch live metrics');
 
                 const result = await response.json();
 
-                // Map backend response to UI shape if necessary (Mocking this step as if backend returned valid structure)
-                // For now, if fetch fails (which it might if endpoint doesn't exist), we catch and use default.
-
-                // If successful (hypothetically):
-                // setData(transformBackendData(result));
-                // For this demo, we'll assume failure or just use Default to ensure specific values requested.
-                throw new Error("Simulating fallback to static validated data");
+                if (result.status && result.metrics) {
+                    setData(transformBackendData(result));
+                } else {
+                    throw new Error("Invalid data structure");
+                }
 
             } catch (error) {
                 console.warn("Using static fallback data:", error);
-
-                // Toast for fallback
-                toast.error("Live metrics unavailable. Showing validated static report.", {
-                    style: {
-                        background: '#1e293b',
-                        color: '#fff',
-                    },
-                    iconTheme: {
-                        primary: '#f43f5e',
-                        secondary: '#fff',
-                    },
-                });
-
+                toast.error("Live metrics unavailable. Showing validated static report.");
                 setData(DEFAULT_METRICS);
             } finally {
                 setLoading(false);
@@ -169,22 +199,64 @@ const ModelInfo = () => {
 
             {/* Top Level Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {[
-                    { icon: TrendingUp, val: data.accuracy, label: 'Accuracy', suffix: '%', color: 'teal' },
-                    { icon: Database, val: data.dataset_samples, label: 'Dataset Samples', suffix: '', color: 'slate' },
-                    { icon: Binary, val: data.output_classes, label: 'Output Classes', suffix: '', color: 'sky' },
-                    { icon: BarChart3, val: data.macro_f1, label: 'Macro F1', suffix: '', color: 'indigo' }
-                ].map((item, i) => (
-                    <Card key={i} className={`flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-${item.color}-500 dark:bg-slate-900`}>
-                        <span className={`p-3 bg-${item.color}-50 dark:bg-${item.color}-900/20 rounded-full text-${item.color}-600 dark:text-${item.color}-400 mb-2`}>
-                            <item.icon className="w-6 h-6" />
-                        </span>
-                        <span className="text-4xl font-bold text-slate-900 dark:text-white">
-                            <CountUp value={item.val} suffix={item.suffix} />
-                        </span>
-                        <span className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{item.label}</span>
-                    </Card>
-                ))}
+                {/* 1. Accuracy with Radial Gauge */}
+                <Card className="flex flex-col items-center justify-center text-center space-y-4 border-t-4 border-t-teal-500 dark:bg-slate-900 py-6">
+                    <div className="relative w-24 h-24 flex items-center justify-center">
+                        <svg className="w-full h-full transform -rotate-90">
+                            <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="6" fill="none" className="text-slate-200 dark:text-slate-800" />
+                            <motion.circle
+                                cx="48" cy="48" r="40"
+                                stroke="currentColor" strokeWidth="6" fill="none"
+                                strokeLinecap="round"
+                                className="text-teal-500"
+                                initial={{ strokeDasharray: 251, strokeDashoffset: 251 }}
+                                whileInView={{ strokeDashoffset: 251 - (251 * (data.accuracy / 100)) }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1.5, ease: "easeOut" }}
+                            />
+                        </svg>
+                        <div className="absolute flex flex-col items-center">
+                            <span className="text-xl font-bold text-slate-900 dark:text-white">
+                                <CountUp value={data.accuracy} suffix="%" />
+                            </span>
+                        </div>
+                    </div>
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Accuracy</span>
+                </Card>
+
+                {/* 2. Dataset Samples */}
+                <Card className="flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-slate-500 dark:bg-slate-900">
+                    <span className="p-3 bg-slate-50 dark:bg-slate-900/20 rounded-full text-slate-600 dark:text-slate-400 mb-2">
+                        <Database className="w-6 h-6" />
+                    </span>
+                    <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                        <CountUp value={data.dataset_samples} />
+                    </span>
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Dataset Samples</span>
+                </Card>
+
+                {/* 3. Output Classes */}
+                <Card className="flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-sky-500 dark:bg-slate-900">
+                    <span className="p-3 bg-sky-50 dark:bg-sky-900/20 rounded-full text-sky-600 dark:text-sky-400 mb-2">
+                        <Binary className="w-6 h-6" />
+                    </span>
+                    <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                        <CountUp value={data.output_classes} />
+                    </span>
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Output Classes</span>
+                </Card>
+
+                {/* 4. ROC AUC (Replaces Macro F1) */}
+                {/* 4. Macro F1 (Replaces ROC AUC) */}
+                <Card className="flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-indigo-500 dark:bg-slate-900">
+                    <span className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-full text-indigo-600 dark:text-indigo-400 mb-2">
+                        <BarChart3 className="w-6 h-6" />
+                    </span>
+                    <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                        <CountUp value={data.macro_f1} duration={1.5} decimals={2} />
+                    </span>
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Macro F1</span>
+                </Card>
             </div>
 
             {/* Justification & Clinical Notes (New Sections) */}

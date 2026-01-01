@@ -53,9 +53,22 @@ def predict():
         })
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        debug_info = {}
+        if 'processed' in locals():
+            if hasattr(processed, 'columns'):
+                debug_info['input_columns'] = processed.columns.tolist()
+            else:
+                debug_info['input_type'] = str(type(processed))
+        
+        if hasattr(model, 'feature_names_in_'):
+            debug_info['expected_features'] = model.feature_names_in_.tolist()
+
         return jsonify({
             "status": False,
-            "error": str(e)
+            "error": str(e),
+            "debug": debug_info
         }), 500
 
 

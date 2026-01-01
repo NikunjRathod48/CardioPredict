@@ -4,6 +4,8 @@ import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Activity, User, HeartPulse, ArrowRight, RotateCcw, Cigarette, Wine, Zap, Info, CheckCircle2, TrendingUp, ShieldCheck, FileDown, Stethoscope, AlertTriangle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -328,7 +330,7 @@ const Predict = () => {
     };
 
     const onSubmit = async (data) => {
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         setIsLoading(true);
         setResult(null);
 
@@ -347,6 +349,7 @@ const Predict = () => {
         };
 
         try {
+            // Use localhost for local development, or update to your deployed URL
             const response = await fetch('https://cardio-backend-itbt.onrender.com/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -360,7 +363,7 @@ const Predict = () => {
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             const safeProbability = typeof resultData.risk_probability === 'number' && !isNaN(resultData.risk_probability)
-                ? resultData.risk_probability
+                ? resultData.risk_probability / 100 // Convert percentage to 0-1
                 : 0;
 
             setResult({ ...resultData, probability: safeProbability });
@@ -369,8 +372,8 @@ const Predict = () => {
             toast.success('Analysis Complete');
 
         } catch (error) {
-            console.error(error);
-            toast.error('Connection failed. Using simulation.');
+            console.error("Prediction Error:", error);
+            toast.error(`Connection Error: ${error.message}. Is backend running?`);
 
             await new Promise(resolve => setTimeout(resolve, 2000));
             const isHighRisk = Math.random() > 0.5;
