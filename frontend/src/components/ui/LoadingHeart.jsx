@@ -36,21 +36,21 @@ const LoadingHeart = ({ text = "Analyzing Vitals..." }) => {
             {/* ECG Line Animation */}
             <div className="w-48 h-12 overflow-hidden relative">
                 <svg viewBox="0 0 200 40" className="w-full h-full">
-                    <path
+                    <motion.path
                         d="M0 20 H80 L90 5 L100 35 L110 20 H200"
                         fill="none"
                         stroke="#fb7185"
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                    />
-                    <motion.rect
-                        width="100%"
-                        height="100%"
-                        className="fill-white dark:fill-slate-950"
-                        initial={{ x: "0%" }}
-                        animate={{ x: "100%" }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                        initial={{ pathLength: 0, opacity: 0.2 }}
+                        animate={{ pathLength: 1, opacity: 1 }}
+                        transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "linear",
+                            repeatType: "loop"
+                        }}
                     />
                 </svg>
             </div>

@@ -56,13 +56,21 @@ const Navbar = () => {
                         <div className="hidden md:flex items-center gap-1.5">
                             {navItems.map((item) => (
                                 item.isPrimary ? (
-                                    <NavLink key={item.path} to={item.path}>
-                                        <Button
-                                            size="sm"
-                                            className="ml-2 !bg-primary !text-primary-foreground !border-none hover:!bg-teal-600 shadow-lg shadow-primary/30 rounded-full px-6"
-                                        >
-                                            {item.name}
-                                        </Button>
+                                    <NavLink key={item.path} to={item.path} className={({ isActive }) => isActive ? "pointer-events-none" : ""}>
+                                        {({ isActive }) => (
+                                            <Button
+                                                size="sm"
+                                                variant={isActive ? "default" : "outline"}
+                                                className={`ml-2 rounded-full px-6 transition-all duration-300
+                                                    ${isActive
+                                                        ? '!bg-primary !text-primary-foreground shadow-lg shadow-primary/30'
+                                                        : 'hover:!bg-primary hover:!text-primary-foreground border-primary/20 text-primary'
+                                                    }
+                                                `}
+                                            >
+                                                {item.name}
+                                            </Button>
+                                        )}
                                     </NavLink>
                                 ) : (
                                     <NavLink
@@ -116,12 +124,13 @@ const Navbar = () => {
                                     key={item.path}
                                     to={item.path}
                                     className={({ isActive }) => `
-                                        p-4 rounded-2xl text-center font-medium transition-all
+                                        block p-3 rounded-xl font-medium text-center transition-all duration-200
                                         ${isActive
                                             ? 'bg-primary/10 text-primary'
                                             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                         }
-                                        ${item.isPrimary ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : ''}
+                                        ${item.isPrimary && isActive ? '!bg-primary !text-primary-foreground shadow-lg shadow-primary/20' : ''}
+                                        ${item.isPrimary && !isActive ? 'border border-primary/20 text-primary' : ''}
                                     `}
                                 >
                                     {item.name}
@@ -129,7 +138,7 @@ const Navbar = () => {
                             ))}
                             <button
                                 onClick={toggleTheme}
-                                className="p-4 rounded-2xl text-center font-medium text-muted-foreground hover:bg-muted flex items-center justify-center gap-2"
+                                className="mt-2 p-3 rounded-xl text-center font-medium text-muted-foreground border border-border bg-card/50 hover:bg-muted flex items-center justify-center gap-2 transition-all duration-200"
                             >
                                 {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                                 <span>Switch Theme</span>

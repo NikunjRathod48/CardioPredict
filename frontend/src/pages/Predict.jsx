@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { Activity, User, HeartPulse, ArrowRight, RotateCcw, Cigarette, Wine, Zap, Info, CheckCircle2, TrendingUp, ShieldCheck, FileDown, Stethoscope, AlertTriangle } from 'lucide-react';
+import { Stethoscope, Activity, FileDown, RotateCcw, ShieldCheck, CheckCircle2, TrendingUp, AlertTriangle, ArrowRight, Cigarette, Wine, User, HeartPulse, Dumbbell } from 'lucide-react';
+import { IoMale, IoFemale } from "react-icons/io5";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import confetti from 'canvas-confetti';
+import CountUp from 'react-countup';
 
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -33,6 +36,8 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
+
+
 const Predict = () => {
     const { register, handleSubmit, control, formState: { errors }, reset, getValues, watch } = useForm({
         mode: 'onChange', // Real-time validation
@@ -47,6 +52,99 @@ const Predict = () => {
     const [result, setResult] = useState(null);
     const [riskFactors, setRiskFactors] = useState([]);
     const [chartData, setChartData] = useState([]);
+
+    // Animation controls for High Risk
+    const shakeControls = useAnimation();
+    const pulseControls = useAnimation();
+
+    // Effect for Results (Confetti for Low Risk, Shake/Pulse for High Risk)
+    React.useEffect(() => {
+        if (!result) return;
+
+        if (result.prediction === 0) {
+            // Low Risk Confetti
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+            const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+            const interval = setInterval(function () {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                const particleCount = 50 * (timeLeft / duration);
+
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+                });
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+                });
+            }, 250);
+        } else {
+            // High Risk Animations
+            const sequence = async () => {
+                // Initial Attention Shake
+                await shakeControls.start({
+                    x: [0, -10, 10, -10, 10, 0],
+                    transition: { duration: 0.4 }
+                });
+                // Continuous Pulse
+                pulseControls.start({
+                    boxShadow: [
+                        "0 0 0 0 rgba(225, 29, 72, 0)",
+                        "0 0 0 10px rgba(225, 29, 72, 0.1)",
+                        "0 0 0 0 rgba(225, 29, 72, 0)"
+                    ],
+                    transition: {
+                        duration: 1.5,
+                        repeat: Infinity,
+                        repeatType: "loop"
+                    }
+                });
+            };
+            sequence();
+
+            // High Risk "Embers" Particle Effect
+            const duration = 4 * 1000; // Increased to 4s to match animation
+            const animationEnd = Date.now() + duration;
+
+            const interval = setInterval(function () {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+
+                // Left side embers
+                confetti({
+                    particleCount: 3, // Increased count
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0, y: 0.7 }, // Start a bit lower
+                    colors: ['#dc2626', '#ea580c', '#7f1d1d'], // Added darker red
+                    shapes: ['square'], // Ashes/Embers look
+                    gravity: 0.6,
+                    scalar: 1.2,
+                    drift: 0.5,
+                    ticks: 300
+                });
+                // Right side embers
+                confetti({
+                    particleCount: 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1, y: 0.7 },
+                    colors: ['#dc2626', '#ea580c', '#7f1d1d'],
+                    shapes: ['square'],
+                    gravity: 0.6,
+                    scalar: 1.2,
+                    drift: -0.5,
+                    ticks: 300
+                });
+            }, 150); // Slightly faster emission
+        }
+    }, [result, shakeControls, pulseControls]);
 
     const calculateBMI = (weight, height) => {
         const heightM = height / 100;
@@ -106,7 +204,7 @@ const Predict = () => {
         }
         if (active === 0) {
             factors.push({
-                icon: Zap,
+                icon: Dumbbell,
                 color: "text-blue-500",
                 title: "Low Physical Activity",
                 advice: "Sedentary habits are a primary driver of cardiovascular decline."
@@ -287,9 +385,9 @@ const Predict = () => {
             doc.setFont("helvetica", "normal");
             doc.setTextColor(colors.slate);
             doc.text([
-                "Model Architecture: Gradient Boosting Classifier",
-                "Training Dataset: 13,095 Medical Records",
-                "Model Accuracy: 73.9%  |  Macro F1 Score: 0.72  |  AUC: 0.80",
+                "Model Architecture: XGBoost Classifier",
+                "Training Dataset: 13,742 Medical Records",
+                "Model Accuracy: 74.0%  |  Macro F1 Score: 0.74  |  AUC: 0.804",
                 "Top Predictors: Systolic BP, Age, Cholesterol"
             ], 14, modelY + 20);
 
@@ -335,12 +433,12 @@ const Predict = () => {
         setResult(null);
 
         const payload = {
+            age_years: parseInt(data.age) || 0,
+            gender: parseInt(data.sex) || 1,
             height: parseInt(data.height) || 0,
             weight: parseInt(data.weight) || 0,
             ap_hi: parseInt(data.ap_hi) || 0,
             ap_lo: parseInt(data.ap_lo) || 0,
-            age_years: parseInt(data.age) || 0,
-            gender: parseInt(data.sex) || 1,
             cholesterol: parseInt(data.cholesterol) || 1,
             gluc: parseInt(data.gluc) || 1,
             smoke: parseInt(data.smoke) || 0,
@@ -350,7 +448,8 @@ const Predict = () => {
 
         try {
             // Use localhost for local development, or update to your deployed URL
-            const response = await fetch('https://cardio-backend-itbt.onrender.com/predict', {
+            // const response = await fetch('https://cardio-backend-itbt.onrender.com/predict', {
+            const response = await fetch('http://localhost:5000/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -390,7 +489,7 @@ const Predict = () => {
     };
 
     return (
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header */}
             {!result && (
                 <div className="text-center space-y-4 mb-12">
@@ -405,7 +504,7 @@ const Predict = () => {
                         Cardiovascular Risk Assessment
                     </h1>
                     <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                        Enter patient vitals below. Our model analyzes key health indicators to estimate heart disease risk with 72% accuracy.
+                        Enter patient vitals below. Our model analyzes key health indicators to estimate heart disease risk with 74% accuracy.
                     </p>
                 </div>
             )}
@@ -428,168 +527,259 @@ const Predict = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                     >
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                            {/* Section 1: Demographics & Physical */}
-                            <section>
-                                <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
-                                    <User className="w-5 h-5 text-teal-500" /> Patient Demographics
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    <Input
-                                        label="Age (Years)"
-                                        type="number"
-                                        placeholder="50"
-                                        {...register("age", { required: "Required", min: 18, max: 100 })}
-                                        error={errors.age?.message}
-                                    />
-                                    <Select
-                                        label="Gender"
-                                        options={[
-                                            { label: 'Male', value: '2' },
-                                            { label: 'Female', value: '1' },
-                                        ]}
-                                        {...register("sex", { required: "Required" })}
-                                        error={errors.sex?.message}
-                                    />
-                                    <Input
-                                        label="Height (cm)"
-                                        type="number"
-                                        placeholder="175"
-                                        {...register("height", { required: "Required", min: 100, max: 250 })}
-                                        error={errors.height?.message}
-                                    />
-                                    <Input
-                                        label="Weight (kg)"
-                                        type="number"
-                                        placeholder="70"
-                                        {...register("weight", { required: "Required", min: 30, max: 200 })}
-                                        error={errors.weight?.message}
-                                    />
-                                </div>
-                            </section>
+                        <Card className="p-6 md:p-8 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 shadow-xl border-slate-200/50 dark:border-slate-800/50">
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                                {/* Section 1: Demographics & Physical */}
+                                <section>
+                                    <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
+                                        <User className="w-5 h-5 text-teal-500" /> Patient Demographics
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                        <Input
+                                            label="Age"
+                                            type="number"
+                                            placeholder="50"
+                                            {...register("age", {
+                                                required: "Required",
+                                                min: { value: 18, message: "Min age 18" },
+                                                max: { value: 100, message: "Max age 100" }
+                                            })}
+                                            error={errors.age?.message} />
+                                        <Controller
+                                            name="sex"
+                                            control={control}
+                                            rules={{ required: "Required" }}
+                                            render={({ field }) => (
+                                                <div className="space-y-2">
+                                                    <label className="block text-sm font-semibold text-foreground ml-1">Gender</label>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        {[
+                                                            { label: 'Male', value: '2', icon: IoMale },
+                                                            { label: 'Female', value: '1', icon: IoFemale }
+                                                        ].map((option) => {
+                                                            const isSelected = field.value === option.value;
+                                                            return (
+                                                                <button
+                                                                    key={option.value}
+                                                                    type="button"
+                                                                    onClick={() => field.onChange(option.value)}
+                                                                    className={`
+                                                                        relative w-full p-3 rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center gap-2 group
+                                                                        ${isSelected
+                                                                            ? 'border-primary bg-primary/10 shadow-md shadow-primary/5'
+                                                                            : 'border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 hover:border-primary/50'
+                                                                        }
+                                                                    `}
+                                                                >
+                                                                    <div className={`
+                                                                        absolute top-2 right-2 w-4 h-4 rounded-full border flex items-center justify-center transition-colors
+                                                                        ${isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-slate-300 dark:border-slate-600 bg-transparent'}
+                                                                    `}>
+                                                                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                                    </div>
 
-                            {/* Section 2: Vitals */}
-                            <section>
-                                <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
-                                    <HeartPulse className="w-5 h-5 text-rose-500" /> Vitals & Blood Pressure
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Input
-                                        label="Systolic BP (ap_hi)"
-                                        type="number"
-                                        placeholder="120"
-                                        helperText="Normal: 90-120 mmHg"
-                                        {...register("ap_hi", {
-                                            required: "Required",
-                                            min: 60,
-                                            max: 250,
-                                            validate: (value) => {
-                                                const lo = getValues("ap_lo");
-                                                if (lo && parseInt(value) <= parseInt(lo)) {
-                                                    return "Systolic must be higher";
+                                                                    <div className={`
+                                                                        w-10 h-10 rounded-full flex items-center justify-center transition-colors
+                                                                        ${isSelected
+                                                                            ? 'bg-primary/20 text-primary'
+                                                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary'
+                                                                        }
+                                                                    `}>
+                                                                        <option.icon className="w-5 h-5" />
+                                                                    </div>
+
+                                                                    <span className={`
+                                                                        font-bold text-xs transition-colors
+                                                                        ${isSelected ? 'text-primary' : 'text-slate-600 dark:text-slate-400 group-hover:text-foreground'}
+                                                                    `}>
+                                                                        {option.label}
+                                                                    </span>
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    {errors.sex && (
+                                                        <p className="text-xs text-destructive font-medium ml-1 animate-fadeInUp">
+                                                            {errors.sex.message}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        />
+                                        <Input
+                                            label="Height (cm)"
+                                            type="number"
+                                            placeholder="170"
+                                            {...register("height", { required: "Required", min: 50, max: 250 })}
+                                            error={errors.height?.message}
+                                        />
+                                        <Input
+                                            label="Weight (kg)"
+                                            type="number"
+                                            placeholder="70"
+                                            {...register("weight", {
+                                                required: "Required",
+                                                min: { value: 30, message: "Min 30kg" },
+                                                max: { value: 200, message: "Max 200kg" }
+                                            })}
+                                            error={errors.weight?.message}
+                                        />
+                                    </div>
+                                </section>
+
+                                {/* Section 2: Vitals */}
+                                <section>
+                                    <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
+                                        <HeartPulse className="w-5 h-5 text-rose-500" /> Vitals & Blood Pressure
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Input
+                                            label="Systolic BP (ap_hi)"
+                                            type="number"
+                                            placeholder="120"
+                                            helperText="Normal: 90-120 mmHg"
+                                            {...register("ap_hi", {
+                                                required: "Required",
+                                                min: { value: 60, message: "Min 60" },
+                                                max: { value: 250, message: "Max 250" },
+                                                validate: (value) => {
+                                                    const lo = getValues("ap_lo");
+                                                    if (lo && parseInt(value) <= parseInt(lo)) {
+                                                        return "Systolic must be higher";
+                                                    }
+                                                    return true;
                                                 }
-                                                return true;
-                                            }
-                                        })}
-                                        error={errors.ap_hi?.message}
-                                    />
-                                    <Input
-                                        label="Diastolic BP (ap_lo)"
-                                        type="number"
-                                        placeholder="80"
-                                        helperText="Normal: 60-80 mmHg"
-                                        {...register("ap_lo", {
-                                            required: "Required",
-                                            min: 40,
-                                            max: 150,
-                                            validate: (value) => {
-                                                const hi = getValues("ap_hi");
-                                                if (hi && parseInt(value) >= parseInt(hi)) {
-                                                    return "Diastolic must be lower";
+                                            })}
+                                            error={errors.ap_hi?.message}
+                                        />
+                                        <Input
+                                            label="Diastolic BP (ap_lo)"
+                                            type="number"
+                                            placeholder="80"
+                                            helperText="Normal: 60-80 mmHg"
+                                            {...register("ap_lo", {
+                                                required: "Required",
+                                                min: { value: 40, message: "Min 40" },
+                                                max: { value: 150, message: "Max 150" },
+                                                validate: (value) => {
+                                                    const hi = getValues("ap_hi");
+                                                    if (hi && parseInt(value) >= parseInt(hi)) {
+                                                        return "Diastolic must be lower";
+                                                    }
+                                                    return true;
                                                 }
-                                                return true;
-                                            }
-                                        })}
-                                        error={errors.ap_lo?.message}
-                                    />
-                                </div>
-                            </section>
+                                            })}
+                                            error={errors.ap_lo?.message}
+                                        />
+                                    </div>
+                                </section>
 
-                            {/* Section 3: Lab Results & Lifestyle */}
-                            <section>
-                                <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
-                                    <Activity className="w-5 h-5 text-sky-500" /> Bio-Markers & Habits
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                    <Select
-                                        label="Cholesterol Level"
-                                        options={[
-                                            { label: 'Normal', value: '1' },
-                                            { label: 'Above Normal', value: '2' },
-                                            { label: 'High', value: '3' },
-                                        ]}
-                                        {...register("cholesterol", { required: "Required" })}
-                                    />
-                                    <Select
-                                        label="Glucose Level"
-                                        options={[
-                                            { label: 'Normal', value: '1' },
-                                            { label: 'Above Normal', value: '2' },
-                                            { label: 'High', value: '3' },
-                                        ]}
-                                        {...register("gluc", { required: "Required" })}
-                                    />
-                                </div>
+                                {/* Section 3: Lab Results & Lifestyle */}
+                                <section>
+                                    <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
+                                        <Activity className="w-5 h-5 text-sky-500" /> Bio-Markers & Habits
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                        <Controller
+                                            name="cholesterol"
+                                            control={control}
+                                            rules={{ required: "Required" }}
+                                            render={({ field }) => (
+                                                <Select
+                                                    label="Cholesterol Level"
+                                                    options={[
+                                                        { label: 'Normal', value: '1' },
+                                                        { label: 'Above Normal', value: '2' },
+                                                        { label: 'High', value: '3' },
+                                                    ]}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    error={errors.cholesterol?.message}
+                                                />
+                                            )}
+                                        />
+                                        <Controller
+                                            name="gluc"
+                                            control={control}
+                                            rules={{ required: "Required" }}
+                                            render={({ field }) => (
+                                                <Select
+                                                    label="Glucose Level"
+                                                    options={[
+                                                        { label: 'Normal', value: '1' },
+                                                        { label: 'Above Normal', value: '2' },
+                                                        { label: 'High', value: '3' },
+                                                    ]}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    error={errors.gluc?.message}
+                                                />
+                                            )}
+                                        />
+                                    </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <Controller
-                                        name="active"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <IconCheckbox
-                                                label="Active Lifestyle"
-                                                icon={Zap}
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                            />
-                                        )}
-                                    />
-                                    <Controller
-                                        name="smoke"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <IconCheckbox
-                                                label="Smoker"
-                                                icon={Cigarette}
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                            />
-                                        )}
-                                    />
-                                    <Controller
-                                        name="alco"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <IconCheckbox
-                                                label="Alcohol Intake"
-                                                icon={Wine}
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                            />
-                                        )}
-                                    />
-                                </div>
-                            </section>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <Controller
+                                            name="active"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <IconCheckbox
+                                                    label="Physical Active"
+                                                    icon={Dumbbell}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                            )}
+                                        />
+                                        <Controller
+                                            name="smoke"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <IconCheckbox
+                                                    label="Smoker"
+                                                    icon={Cigarette}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                            )}
+                                        />
+                                        <Controller
+                                            name="alco"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <IconCheckbox
+                                                    label="Alcohol Intake"
+                                                    icon={Wine}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                            )}
+                                        />
+                                    </div>
+                                </section>
 
-                            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
-                                <Button type="submit" size="lg" className="w-full shadow-xl shadow-teal-900/10 dark:shadow-teal-900/40">
-                                    Generate Risk Analysis <ArrowRight className="w-5 h-5 ml-2" />
-                                </Button>
-                                <p className="text-center text-xs text-slate-400 mt-4">
-                                    AI predictions are estimates and do not replace professional diagnosis.
-                                </p>
-                            </div>
-                        </form>
+                                <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+                                    <Button type="submit" size="lg" className="w-full shadow-xl shadow-teal-900/10 dark:shadow-teal-900/40 relative overflow-hidden group">
+                                        <motion.div
+                                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 translate-x-[-200%]"
+                                            animate={{ translateX: ['-200%', '200%'] }}
+                                            transition={{
+                                                repeat: Infinity,
+                                                duration: 2,
+                                                repeatDelay: 1,
+                                                ease: "linear"
+                                            }}
+                                        />
+                                        <span className="relative z-10 flex items-center justify-center">
+                                            Generate Risk Analysis <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                                        </span>
+                                    </Button>
+                                    <p className="text-center text-xs text-slate-400 mt-4">
+                                        AI predictions are estimates and do not replace professional diagnosis.
+                                    </p>
+                                </div>
+                            </form>
+                        </Card>
                     </motion.div>
                 ) : (
                     <motion.div
@@ -599,8 +789,8 @@ const Predict = () => {
                         className="space-y-8 pb-12"
                     >
                         {/* Wrapper for buttons */}
-                        <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center gap-3 w-full md:w-auto">
                                 <div className={`p-2 rounded-lg ${result.prediction === 1 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
                                     <Stethoscope className="w-5 h-5" />
                                 </div>
@@ -609,70 +799,78 @@ const Predict = () => {
                                     <p className="text-sm font-medium text-slate-900 dark:text-white">Analysis Ready</p>
                                 </div>
                             </div>
-                            <div className="flex gap-3">
-                                <Button onClick={generatePDF} variant="outline" size="sm">
+                            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                <Button onClick={generatePDF} variant="outline" size="sm" className="w-full md:w-auto justify-center">
                                     <FileDown className="w-4 h-4 mr-2" /> Download Report
                                 </Button>
-                                <Button onClick={() => { setResult(null); reset(); }} variant="secondary" size="sm">
+                                <Button onClick={() => { setResult(null); reset(); }} variant="secondary" size="sm" className="w-full md:w-auto justify-center">
                                     <RotateCcw className="w-4 h-4 mr-2" /> Re-Assess
                                 </Button>
                             </div>
                         </div>
 
-                        <Card
-                            className={`text-center py-8 border-l-8 ${result.prediction === 1 ? 'border-l-rose-500 bg-rose-50/20 dark:bg-rose-900/5' : 'border-l-emerald-500 bg-emerald-50/20 dark:bg-emerald-900/5'}`}
-                            animate={result.prediction === 1 ? {
-                                scale: [1, 1.02, 1],
-                                borderColor: ['rgba(244, 63, 94, 0)', 'rgba(244, 63, 94, 0.5)', 'rgba(244, 63, 94, 0)']
-                            } : {}}
-                            transition={result.prediction === 1 ? {
-                                repeat: Infinity,
-                                duration: 2.5,
-                                ease: "easeInOut"
-                            } : {}}
+                        <motion.div
+                            animate={result.prediction === 1 ? shakeControls : {}}
+                            style={{ position: 'relative' }} // For pulse overlay
                         >
-                            <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-                                <div className="space-y-3 text-left max-w-lg">
-                                    <p className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Diagnostic Indication</p>
-                                    <h2 className={`text-4xl md:text-5xl font-display font-bold ${result.prediction === 1 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                                        {result.prediction === 1 ? 'Elevated Risk Detected' : 'Low Risk Profile'}
-                                    </h2>
-                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
-                                        {result.prediction === 1
-                                            ? "Clinical indicators suggest elevated cardiovascular stress. This warrants immediate attention to lifestyle factors and specific vitals."
-                                            : "Your vitals presently align with healthy benchmarks. Maintaining your current lifestyle supports continued cardiovascular health."}
-                                    </p>
+                            {/* High Risk Pulse Overlay */}
+                            {result.prediction === 1 && (
+                                <motion.div
+                                    animate={pulseControls}
+                                    className="absolute inset-0 rounded-2xl pointer-events-none"
+                                />
+                            )}
 
-                                    {/* Confidence Badge */}
-                                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase mt-2 ${getConfidenceLevel(result.probability).color}`}>
-                                        <ShieldCheck className="w-4 h-4" />
-                                        Model Confidence: {getConfidenceLevel(result.probability).label}
+                            <Card
+                                className={`text-center py-10 border-2 backdrop-blur-xl shadow-2xl transition-all duration-500
+                                    ${result.prediction === 1
+                                        ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20 shadow-rose-500/30'
+                                        : 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 shadow-emerald-500/30'
+                                    }`}
+                            >
+                                <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 relative z-10">
+                                    <div className="space-y-3 text-left max-w-lg">
+                                        <p className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Diagnostic Indication</p>
+                                        <h2 className={`text-4xl md:text-5xl font-display font-bold ${result.prediction === 1 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                            {result.prediction === 1 ? 'Elevated Risk Detected' : 'Low Risk Profile'}
+                                        </h2>
+                                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
+                                            {result.prediction === 1
+                                                ? "Clinical indicators suggest elevated cardiovascular stress. This warrants immediate attention to lifestyle factors and specific vitals."
+                                                : "Your vitals presently align with healthy benchmarks. Maintaining your current lifestyle supports continued cardiovascular health."}
+                                        </p>
+
+                                        {/* Confidence Badge */}
+                                        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase mt-2 ${getConfidenceLevel(result.probability).color}`}>
+                                            <ShieldCheck className="w-4 h-4" />
+                                            Model Confidence: {getConfidenceLevel(result.probability).label}
+                                        </div>
+                                    </div>
+
+                                    {/* Radial Gauge */}
+                                    <div className="relative w-40 h-40 flex items-center justify-center shrink-0">
+                                        <svg className="w-full h-full transform -rotate-90">
+                                            <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="10" fill="none" className="text-slate-200 dark:text-slate-800" />
+                                            <motion.circle
+                                                cx="80" cy="80" r="70"
+                                                stroke="currentColor" strokeWidth="10" fill="none"
+                                                strokeLinecap="round"
+                                                className={result.prediction === 1 ? 'text-rose-500' : 'text-emerald-500'}
+                                                initial={{ strokeDasharray: 440, strokeDashoffset: 440 }}
+                                                animate={{ strokeDashoffset: 440 - (440 * result.probability) }}
+                                                transition={{ duration: 1.5, ease: "easeOut" }}
+                                            />
+                                        </svg>
+                                        <div className="absolute flex flex-col items-center">
+                                            <span className={`text-3xl font-bold ${result.prediction === 1 ? 'text-rose-600 dark:text-white' : 'text-emerald-600 dark:text-white'}`}>
+                                                <CountUp end={result.probability * 100} duration={2.5} suffix="%" />
+                                            </span>
+                                            <span className="text-[10px] text-slate-500 font-bold uppercase">Probability</span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* Radial Gauge */}
-                                <div className="relative w-40 h-40 flex items-center justify-center shrink-0">
-                                    <svg className="w-full h-full transform -rotate-90">
-                                        <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="10" fill="none" className="text-slate-200 dark:text-slate-800" />
-                                        <motion.circle
-                                            cx="80" cy="80" r="70"
-                                            stroke="currentColor" strokeWidth="10" fill="none"
-                                            strokeLinecap="round"
-                                            className={result.prediction === 1 ? 'text-rose-500' : 'text-emerald-500'}
-                                            initial={{ strokeDasharray: 440, strokeDashoffset: 440 }}
-                                            animate={{ strokeDashoffset: 440 - (440 * result.probability) }}
-                                            transition={{ duration: 1.5, ease: "easeOut" }}
-                                        />
-                                    </svg>
-                                    <div className="absolute flex flex-col items-center">
-                                        <span className={`text-3xl font-bold ${result.prediction === 1 ? 'text-rose-600 dark:text-white' : 'text-emerald-600 dark:text-white'}`}>
-                                            {(result.probability * 100).toFixed(0)}%
-                                        </span>
-                                        <span className="text-[10px] text-slate-500 font-bold uppercase">Probability</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
+                            </Card>
+                        </motion.div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Why This Decision / Risk Factors */}
@@ -741,9 +939,11 @@ const Predict = () => {
 
                         {/* Disclaimer Footer */}
                         <div className="pt-8 text-center border-t border-slate-100 dark:border-slate-800">
-                            <div className="inline-flex items-center gap-2 text-slate-400 dark:text-slate-500 text-xs font-medium bg-slate-50 dark:bg-slate-900/50 px-4 py-2 rounded-full border border-slate-100 dark:border-slate-800">
-                                <AlertTriangle className="w-3.5 h-3.5" />
-                                <span>Disclaimer: This result is intended for awareness only and is not a certified medical diagnosis. Consult healthcare professionals for evaluation.</span>
+                            <div className="inline-flex flex-col md:flex-row items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-xs font-medium bg-slate-50 dark:bg-slate-900/50 px-4 py-3 rounded-2xl border border-slate-100 dark:border-slate-800 max-w-full md:max-w-fit mx-auto">
+                                <AlertTriangle className="w-5 h-5 shrink-0 mb-1 md:mb-0 text-amber-500/80" />
+                                <span className="text-center md:text-left leading-relaxed">
+                                    Disclaimer: This result is intended for awareness only and is not a certified medical diagnosis. Consult healthcare professionals for evaluation.
+                                </span>
                             </div>
                         </div>
 

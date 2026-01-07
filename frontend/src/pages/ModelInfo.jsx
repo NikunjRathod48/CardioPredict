@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { motion, useSpring, useTransform, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, AreaChart, Area, ReferenceLine } from 'recharts';
 import { Database, Binary, BarChart3, TrendingUp, Cpu, Layers, BrainCircuit, Activity, Zap, AlertTriangle, FileText, Stethoscope, CheckCircle2 } from 'lucide-react';
-import { Toaster, toast } from 'react-hot-toast';
 import Card from '@/components/ui/Card';
 
 // --- Utility Components ---
@@ -63,19 +62,19 @@ const SkeletonLoader = () => (
 // --- Static Fallback Data ---
 
 const DEFAULT_METRICS = {
-    accuracy: 73.9,
-    dataset_samples: 13095,
+    accuracy: 74.0,
+    dataset_samples: 13742,
     output_classes: 2,
-    macro_f1: 0.72,
+    macro_f1: 0.74,
     confusion_matrix: [
-        { type: 'TN', value: 4926, label: 'True Negative', desc: 'Correctly identified healthy', color: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' },
-        { type: 'FP', value: 1531, label: 'False Positive', desc: 'Incorrectly flagged risk', color: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-800' },
-        { type: 'FN', value: 2148, label: 'False Negative', desc: 'Missed disease case', color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-800' },
-        { type: 'TP', value: 4490, label: 'True Positive', desc: 'Correctly identified risk', color: 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border-teal-100 dark:border-teal-800' },
+        { type: 'TN', value: 5479, label: 'True Negative', desc: 'Correctly identified healthy', color: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' },
+        { type: 'FP', value: 1462, label: 'False Positive', desc: 'Incorrectly flagged risk', color: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-800' },
+        { type: 'FN', value: 2139, label: 'False Negative', desc: 'Missed disease case', color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-800' },
+        { type: 'TP', value: 4662, label: 'True Positive', desc: 'Correctly identified risk', color: 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border-teal-100 dark:border-teal-800' },
     ],
     classification_metrics: [
-        { name: 'Healthy (No Risk)', Precision: 0.70, Recall: 0.76, F1: 0.73 },
-        { name: 'At Risk (Positive)', Precision: 0.75, Recall: 0.68, F1: 0.71 },
+        { name: 'Healthy (No Risk)', Precision: 0.72, Recall: 0.79, F1: 0.75 },
+        { name: 'At Risk (Positive)', Precision: 0.76, Recall: 0.69, F1: 0.72 },
     ],
     feature_importance: [
         { name: 'Sys. BP', value: 0.32 },
@@ -102,84 +101,11 @@ const DEFAULT_METRICS = {
 // --- Main Component ---
 
 const ModelInfo = () => {
-    const [loading, setLoading] = useState(true);
-    const [data, setData] = useState(null);
-
-    useEffect(() => {
-        const transformBackendData = (apiResponse) => {
-            const m = apiResponse.metrics;
-            if (!m) return null;
-
-            // Zip ROC data
-            const rocData = m.roc_curve.fpr.map((f, i) => ({
-                fpr: f,
-                tpr: m.roc_curve.tpr[i] || 0
-            }));
-
-            return {
-                accuracy: (m.accuracy * 100).toFixed(1),
-                dataset_samples: m.dataset_samples,
-                output_classes: 2,
-                macro_f1: m.class_report.macro_f1.toFixed(2),
-                confusion_matrix: [
-                    { type: 'TN', value: m.confusion_matrix.tn, label: 'True Negative', desc: 'Correctly identified healthy', color: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' },
-                    { type: 'FP', value: m.confusion_matrix.fp, label: 'False Positive', desc: 'Incorrectly flagged risk', color: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-800' },
-                    { type: 'FN', value: m.confusion_matrix.fn, label: 'False Negative', desc: 'Missed disease case', color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-800' },
-                    { type: 'TP', value: m.confusion_matrix.tp, label: 'True Positive', desc: 'Correctly identified risk', color: 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border-teal-100 dark:border-teal-800' },
-                ],
-                classification_metrics: [
-                    {
-                        name: 'Healthy (No Risk)',
-                        Precision: m.class_report.class_0.precision,
-                        Recall: m.class_report.class_0.recall,
-                        F1: m.class_report.class_0.f1
-                    },
-                    {
-                        name: 'At Risk (Positive)',
-                        Precision: m.class_report.class_1.precision,
-                        Recall: m.class_report.class_1.recall,
-                        F1: m.class_report.class_1.f1
-                    },
-                ],
-                feature_importance: m.feature_importance,
-                roc_data: rocData,
-                // Keep static SHAP data as it is not provided by backend
-                shap_data: DEFAULT_METRICS.shap_data
-            };
-        };
-
-        const fetchMetrics = async () => {
-            try {
-                // Simulate network delay for premium feel
-                await new Promise(resolve => setTimeout(resolve, 800));
-
-                const response = await fetch('https://cardio-backend-itbt.onrender.com/model-metrics');
-                if (!response.ok) throw new Error('Failed to fetch live metrics');
-
-                const result = await response.json();
-
-                if (result.status && result.metrics) {
-                    setData(transformBackendData(result));
-                } else {
-                    throw new Error("Invalid data structure");
-                }
-
-            } catch (error) {
-                console.warn("Using static fallback data:", error);
-                toast.error("Live metrics unavailable. Showing validated static report.");
-                setData(DEFAULT_METRICS);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchMetrics();
-    }, []);
-
-    if (loading) return <SkeletonLoader />;
+    // Static data usage as requested
+    const [data] = useState(DEFAULT_METRICS);
 
     return (
-        <div className="max-w-6xl mx-auto space-y-16 pb-20">
+        <div className="max-w-6xl mx-auto space-y-16 pb-20 px-4 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="text-center space-y-4">
                 <motion.div
@@ -193,14 +119,14 @@ const ModelInfo = () => {
                     Model Architecture & Performance
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto text-lg">
-                    Comprehensive evaluation of the Gradient Boosting Classifier, optimized for high-sensitivity cardiovascular risk detection.
+                    Comprehensive evaluation of the XGBoost (Extreme Gradient Boosting), optimized for high-sensitivity cardiovascular risk detection.
                 </p>
             </div>
 
             {/* Top Level Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* 1. Accuracy with Radial Gauge */}
-                <Card className="flex flex-col items-center justify-center text-center space-y-4 border-t-4 border-t-teal-500 dark:bg-slate-900 py-6">
+                <Card className="flex flex-col items-center justify-center text-center space-y-4 border-t-4 border-t-teal-500 dark:border-t-teal-500 dark:bg-slate-900 py-6">
                     <div className="relative w-24 h-24 flex items-center justify-center">
                         <svg className="w-full h-full transform -rotate-90">
                             <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="6" fill="none" className="text-slate-200 dark:text-slate-800" />
@@ -225,7 +151,7 @@ const ModelInfo = () => {
                 </Card>
 
                 {/* 2. Dataset Samples */}
-                <Card className="flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-slate-500 dark:bg-slate-900">
+                <Card className="flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-slate-500 dark:border-t-slate-500 dark:bg-slate-900">
                     <span className="p-3 bg-slate-50 dark:bg-slate-900/20 rounded-full text-slate-600 dark:text-slate-400 mb-2">
                         <Database className="w-6 h-6" />
                     </span>
@@ -236,7 +162,7 @@ const ModelInfo = () => {
                 </Card>
 
                 {/* 3. Output Classes */}
-                <Card className="flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-sky-500 dark:bg-slate-900">
+                <Card className="flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-sky-500 dark:border-t-sky-500 dark:bg-slate-900">
                     <span className="p-3 bg-sky-50 dark:bg-sky-900/20 rounded-full text-sky-600 dark:text-sky-400 mb-2">
                         <Binary className="w-6 h-6" />
                     </span>
@@ -246,9 +172,8 @@ const ModelInfo = () => {
                     <span className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Output Classes</span>
                 </Card>
 
-                {/* 4. ROC AUC (Replaces Macro F1) */}
                 {/* 4. Macro F1 (Replaces ROC AUC) */}
-                <Card className="flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-indigo-500 dark:bg-slate-900">
+                <Card className="flex flex-col items-center justify-center text-center space-y-2 border-t-4 border-t-indigo-500 dark:border-t-indigo-500 dark:bg-slate-900">
                     <span className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-full text-indigo-600 dark:text-indigo-400 mb-2">
                         <BarChart3 className="w-6 h-6" />
                     </span>
@@ -258,6 +183,12 @@ const ModelInfo = () => {
                     <span className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Macro F1</span>
                 </Card>
             </div>
+
+            <p className="text-center text-sm text-slate-500 dark:text-slate-400 max-w-3xl mx-auto">
+                Due to mild class imbalance in the dataset, metrics such as <strong>ROC-AUC</strong>, <strong>Recall</strong>, and
+                <strong> F1-Score</strong> are considered more informative than accuracy alone.
+            </p>
+
 
             {/* Justification & Clinical Notes (New Sections) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -272,12 +203,13 @@ const ModelInfo = () => {
                         </h3>
                         <div className="prose prose-sm dark:prose-invert text-slate-600 dark:text-slate-400">
                             <p>
-                                <strong>Gradient Boosting</strong> was selected as the final production model after rigorous benchmarking against Logistic Regression, Decision Trees, and Random Forests.
+                                <strong>XGBoost (Extreme Gradient Boosting)</strong> was selected as the final model after benchmarking against Logistic Regression,
+                                Decision Trees, Random Forests, and classical Gradient Boosting methods.
                             </p>
                             <ul className="mt-2 text-sm space-y-2">
-                                <li>It achieved the best balance between <strong>Precision</strong> and <strong>Recall</strong> (Macro F1: 0.72).</li>
-                                <li>Crucially, it minimized <strong>False Negatives</strong> (missed diagnoses), aligning with our safety-critical healthcare objective.</li>
-                                <li>The ensemble approach provided superior robustness against noise in the 13,000+ patient dataset.</li>
+                                <li>It achieved the strongest overall balance between <strong>Precision</strong> and <strong>Recall</strong> (Macro F1 ≈ 0.72).</li>
+                                <li>The model demonstrates robust performance on structured clinical data with non-linear feature interactions.</li>
+                                <li>Its ensemble learning strategy improves generalization across diverse patient profiles.</li>
                             </ul>
                         </div>
                     </Card>
@@ -327,6 +259,10 @@ const ModelInfo = () => {
                             </Card>
                         ))}
                     </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                        In a healthcare context, False Negatives (missed high-risk cases) are more critical than False Positives.
+                        The observed trade-off reflects the inherent difficulty of medical risk prediction on real-world data.
+                    </p>
                 </motion.div>
 
                 {/* Metric Charts */}
@@ -371,7 +307,7 @@ const ModelInfo = () => {
                             Higher values indicate stronger influence on the model’s decision. Systolic BP and Age contribute most to cardiovascular risk predictions in this model.
                         </p>
                         <p className="text-xs text-slate-400 dark:text-slate-500 italic">
-                            These importance values are derived from the Gradient Boosting model used for prediction.
+                            These importance values are derived from the XGBoost model used for prediction.
                         </p>
                     </div>
                     <div className="space-y-4">
@@ -423,14 +359,14 @@ const ModelInfo = () => {
                     </h2>
                     <div className="prose dark:prose-invert text-slate-600 dark:text-slate-400">
                         <p>
-                            The system utilizes a <strong>Gradient Boosting Classifier</strong>, a sophisticated ensemble learning technique designed for high-stakes medical categorization. By systematically analyzing over <strong>13,000 patient records</strong>, the model prioritizes clinical reliability and the minimization of diagnostic errors.
+                            The system utilizes a <strong>XGBoost (Extreme Gradient Boosting)</strong>, a sophisticated ensemble learning technique designed for high-stakes medical categorization. By systematically analyzing over <strong>13,000 patient records</strong>, the model prioritizes clinical reliability and the minimization of diagnostic errors.
                         </p>
                         <ul className="space-y-6 list-disc pl-5 mt-4">
                             <li>
                                 <strong>Ensemble Learning Strategy:</strong> The model constructs a sequence of decision trees where each subsequent tree explicitly corrects the prediction errors of its predecessors. This iterative improvement process creates a highly accurate predictor robust to complex non-linear relationships in patient data.
                             </li>
                             <li>
-                                <strong>Rigorous Validation:</strong> To ensure generalization and reliability, the system underwent an <strong>80/20 Train-Test Split</strong> followed by <strong>5-Fold Cross Validation</strong>. This procedure verifies that performance metrics are consistent across diverse patient subsets, preventing overfitting.
+                                <strong>Rigorous Validation:</strong> To ensure generalization and reliability, the system underwent an <strong>80/20 Train-Test Split</strong> followed by <strong>3-Fold Cross Validation</strong>. This procedure verifies that performance metrics are consistent across diverse patient subsets, preventing overfitting.
                             </li>
                             <li>
                                 <strong>Performance Objective:</strong> A core clinical goal was maximizing <strong>Recall</strong> to reduce False Negatives. In a cardiovascular context, identifying potential risks early is paramount; thus, the model is tuned to favor sensitivity, ensuring at-risk individuals are flagged for professional review.
@@ -520,7 +456,7 @@ const ModelInfo = () => {
                             Quantifying how individual features push the prediction toward "Risk" (Positive) or "Healthy" (Negative).
                         </p>
                     </div>
-                    <Card className="h-[320px] dark:bg-slate-900 overflow-hidden">
+                    <Card className="min-h-[320px] h-auto p-6 dark:bg-slate-900">
                         <div className="space-y-6 pt-2">
                             {data.shap_data.map((item, i) => (
                                 <motion.div
@@ -563,14 +499,21 @@ const ModelInfo = () => {
                             ))}
                         </div>
                     </Card>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 italic">
+                        SHAP visualizations shown here are illustrative summaries intended to explain typical model behavior,
+                        not individualized medical explanations.
+                    </p>
+
                 </motion.div>
             </div>
 
             {/* Disclaimer Footer */}
             <div className="pt-10 pb-4 text-center border-t border-slate-100 dark:border-slate-800 mt-12">
-                <div className="inline-flex items-center gap-2 text-slate-400 dark:text-slate-500 text-xs font-medium bg-slate-50 dark:bg-slate-900/50 px-4 py-2 rounded-full border border-slate-100 dark:border-slate-800">
-                    <AlertTriangle className="w-3.5 h-3.5" />
-                    <span>Disclaimer: This system is intended for educational and decision-support purposes only. It is not a certified medical diagnostic tool.</span>
+                <div className="inline-flex flex-col md:flex-row items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-xs font-medium bg-slate-50 dark:bg-slate-900/50 px-4 py-3 rounded-2xl border border-slate-100 dark:border-slate-800 max-w-full md:max-w-fit mx-auto">
+                    <AlertTriangle className="w-5 h-5 shrink-0 mb-1 md:mb-0 text-amber-500/80" />
+                    <span className="text-center md:text-left leading-relaxed">
+                        Disclaimer: This system is intended for educational and decision-support purposes only. It is not a certified medical diagnostic tool.
+                    </span>
                 </div>
             </div>
         </div>

@@ -12,14 +12,14 @@ const Input = React.forwardRef(({ label, error, helperText, className = '', ...p
                 <input
                     ref={ref}
                     className={`
-                        w-full px-4 py-3.5 rounded-xl border bg-input/20 text-foreground placeholder:text-muted-foreground
+                        w-full px-4 py-3.5 rounded-xl border bg-white/50 dark:bg-slate-900/50 text-foreground placeholder:text-muted-foreground
                         text-sm font-medium transition-all duration-300
-                        focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring focus:bg-card
-                        hover:border-accent-foreground/30
+                        focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white dark:focus:bg-slate-900
+                        hover:border-primary/50
                         disabled:opacity-60 disabled:cursor-not-allowed
                         ${error
                             ? 'border-destructive focus:ring-destructive/20 focus:border-destructive bg-destructive/5'
-                            : 'border-input'
+                            : 'border-slate-200 dark:border-slate-800'
                         }
                         ${className}
                     `}

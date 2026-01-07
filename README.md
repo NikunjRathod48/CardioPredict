@@ -182,5 +182,8 @@ npm run dev
 ## ⭐ Support
 If you found this project useful, please ⭐ the repo — it helps a lot!
 
-<h3 align="center">🧡 Thank You for Visiting CardioPredict AI</h3>
-<p align="center">Empowering healthcare awareness through intelligent technology.</p>
+---
+
+### 🧡 Thank You for Visiting CardioPredict AI
+
+Helping technology support healthier hearts, one prediction at a time.

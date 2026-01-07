@@ -14,7 +14,7 @@ const Card = ({ children, className = '', hoverEffect = false, depth = 'soft', .
             whileHover={hoverEffect ? { y: -4, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01)" } : {}}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className={`
-                bg-card text-card-foreground rounded-2xl border p-6 md:p-8 relative overflow-hidden transition-colors duration-300
+                bg-white/95 dark:bg-slate-900/90 text-card-foreground rounded-2xl border border-slate-100 dark:border-slate-800 p-6 md:p-8 relative overflow-hidden transition-all duration-300
                 ${shadows[depth]}
                 ${className}
             `}
