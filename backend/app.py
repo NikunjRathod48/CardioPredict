@@ -26,15 +26,6 @@ def home():
         "message": "Cardio Disease Prediction API is running"
     })
 
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({
-        "status": "ok",
-        "service": "cardio-backend",
-        "uptime_check": True,
-        "timestamp": int(time.time())
-    })
-
 # ------------------------------
 # Prediction
 # ------------------------------

@@ -448,7 +448,7 @@ const Predict = () => {
 
         try {
             // Use localhost for local development, or update to your deployed URL
-            const response = await fetch('https://cardio-backend-itbt.onrender.com/predict', {
+            const response = await fetch('https://cardiopredict-api.up.railway.app//predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

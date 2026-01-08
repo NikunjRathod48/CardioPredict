@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://cardio-risk-predictor.netlify.app/"><img src="https://img.shields.io/badge/Live%20Demo-Online-brightgreen" alt="Live Demo" /></a>
-  <img src="https://img.shields.io/badge/Model-Gradient%20Boosting-blue" alt="Model" />
+  <img src="https://img.shields.io/badge/Model-XGBoost-blue" alt="Model" />
   <img src="https://img.shields.io/badge/Accuracy-73.9%25-purple" alt="Accuracy" />
   <img src="https://img.shields.io/badge/License-MIT-yellow" alt="License" />
   <img src="https://img.shields.io/badge/Status-Production%20Ready-success" alt="Status" />
@@ -43,22 +43,37 @@ Designed for **education, research, healthcare learning, and intelligent screeni
 | Metric | Score |
 | :--- | :--- |
 | **Accuracy** | 73.9% |
-| **Macro F1** | 0.72 |
+| **Macro F1** | 0.74 |
 | **ROC-AUC** | ~0.80 |
-| **Dataset Size** | 13,095 Records |
-| **Model** | Gradient Boosting Classifier |
+| **Dataset Size** | 13,742 Records |
+| **Model** | XGBoost Classifier (Extreme Gradient Boosting) |
+
+## 🧠 Why XGBoost?
+
+XGBoost (Extreme Gradient Boosting) is an optimized and regularized implementation of the Gradient Boosting framework, specifically designed for performance and scalability on structured/tabular data.
+
+Reasons for selection:
+- Superior performance on medical tabular datasets
+- Built-in regularization to reduce overfitting
+- Handles non-linear feature interactions effectively
+- Strong control over false negatives (clinically important)
+- Widely used in real-world healthcare ML systems
+
+While XGBoost belongs to the Gradient Boosting family, it significantly improves upon traditional Gradient Boosting Classifiers through optimization, tree pruning, and parallelization.
+
+
 
 ### 📌 Confusion Matrix
 | | Predicted Healthy | Predicted At-Risk |
 | :--- | :---: | :---: |
-| **Actual Healthy** | 4926 (TN) | 1531 (FP) |
-| **Actual At-Risk** | 2148 (FN) | 4490 (TP) |
+| **Actual Healthy** | 5479 (TN) | 1462 (FP) |
+| **Actual At-Risk** | 2139 (FN) | 4662 (TP) |
 
 ### 🔍 Class Metrics
 | Class | Precision | Recall | F1 |
 | :--- | :---: | :---: | :---: |
-| Healthy (0) | 0.70 | 0.76 | 0.73 |
-| At-Risk (1) | 0.75 | 0.68 | 0.71 |
+| Healthy (0) | 0.72 | 0.79 | 0.75 |
+| At-Risk (1) | 0.76 | 0.69 | 0.72 |
 
 ---
 
@@ -73,10 +88,10 @@ Designed for **education, research, healthcare learning, and intelligent screeni
 ### **Backend**
 - Flask (Python)
 - REST API
-- Render Hosted
+- Railway Cloud Hosting
 
 ### **Machine Learning**
-- Gradient Boosting Classifier
+- XGBoost Classifier (Extreme Gradient Boosting)
 - Scikit-Learn
 - Pandas / NumPy
 - Feature Scaling & Preprocessing
@@ -90,8 +105,7 @@ CardioPredict
 │   ├── app.py
 │   ├── requirements.txt
 │   ├── model/
-│   │   ├── cardio_model.pkl
-│   │   └── scaler.pkl
+│   │   ├── cardio_final_safe_model.pkl
 │   └── utils/
 │       └── preprocessing.py
 ├── frontend/
@@ -103,6 +117,9 @@ CardioPredict
 ---
 
 ## 🧩 API Usage
+
+### 🔗 Base URL
+https://cardiopredict-api.up.railway.app
 
 ### 🔗 Endpoint
 `POST /predict`
@@ -118,6 +135,8 @@ CardioPredict
   "gluc": 3,
   "smoke": 1,
   "alco": 1,
+  "gender": 1,
+  "active": 1,
   "age_years": 58
 }
 ```
@@ -131,6 +150,8 @@ CardioPredict
   "risk_label": "High Risk"
 }
 ```
+
+
 
 ---
 
@@ -161,9 +182,9 @@ npm run dev
 ## 🌍 Deployment
 | Service | Platform |
 | :--- | :--- |
-| **Backend** | Render |
+| **Backend** | Railway |
 | **Frontend** | Netlify |
-| **Model** | Pickle Deployed |
+| **Model** | Joblib Deployed |
 
 ---
 
